@@ -1,4 +1,4 @@
-# fee-tracker-backend
+# fee-tracker
 In Iran, managing money is such a challenging issue.
 why? because of the difficult and complicated economic situations, the country is facing. 
 

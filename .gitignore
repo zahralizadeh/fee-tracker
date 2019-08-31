@@ -1,6 +1,7 @@
 venv/
 .vscode/
 *.sqlite3
+.pyc
 ### OSX ###
 .DS_Store
 .AppleDouble

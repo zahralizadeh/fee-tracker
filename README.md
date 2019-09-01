@@ -7,6 +7,3 @@ Also, this system can help you know how much money you need to buy something.
 This system is based on advertisements for properties. 
 Moreover, it works by using some artificial intelligence methods. 
 I think you will get some interesting results from this system.
-
-This project consists of different components and back-end is one of them. 
-The back-end gathers information from reference sites.

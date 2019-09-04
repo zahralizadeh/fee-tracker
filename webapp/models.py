@@ -26,6 +26,8 @@ class activationcode(models.Model):
     password = models.CharField(max_length = 50)
     code = models.CharField(max_length = 28)
     time = models.DateTimeField()
+    def __str__(self):
+        return "{}".format(self.username)
 
 
 

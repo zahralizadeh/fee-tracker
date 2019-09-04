@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from json import JSONEncoder
 from django.views.decorators.csrf import csrf_exempt
 import requests
-from views import activationcode
+from .models import activationcode
 from .utils import grecaptcha_verify
 from django.contrib.auth.models import User
 
@@ -14,9 +14,9 @@ random_str : lambda N:''.join(random.SystemRandom().\
 
 # Create your views here.
 def manageRequestRegistrationCode(request):
-    if not grecaptcha_verify(request): #captcha is incorrect
-        context = {'message' : 'دوست عزیز کپچا رو اشتباه زدی'}
-        return render(request,'register.html',context)
+   # if not grecaptcha_verify(request): #captcha is incorrect
+   #     context = {'message' : 'دوست عزیز کپچا رو اشتباه زدی'}
+   #     return render(request,'register.html',context)
     
     if User.objects.filter(email = request.POST['email']).exists():
         context = {'message' : 'این ایمیل از قبل ثبت شده! '} #TODO: link to login page
@@ -31,19 +31,23 @@ def manageRequestRegistrationCode(request):
         return render(request,'register.html',context)
     
 
+def manageUnknownRequest(request)  :
+    context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در 20 ثانیه ثبت نام کن'}
+    return render(request,'register.html',context)
     
-    
-    
+
+
 @csrf_exempt
 def register (request):
-
-    if request.POST.haskey('requestcode'): #the client wants to register so send him a registration code
-        return manageRequestRegistrationCode(request)
+    context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در 20 ثانیه ثبت نام کن'}
+    return render(request,'register.html',context)
+   # if request.POST.has_key('requestcode'): #the client wants to register so send him a registration code
+  #     return manageRequestRegistrationCode(request)
     
-    elif request.Get.has_key('code'):     #the client has clicked on activation link
-        return manageClickingActivationLink()
+   # elif request.Get.has_key('code'):     #the client has clicked on activation link
+   #   return manageClickingActivationLink(request)
     
-    else:      #unknows request
-        return manageUnknownRequest()
+  #  else:      #unknows request
+   #     return manageUnknownRequest(request)
     
 

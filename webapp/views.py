@@ -29,7 +29,10 @@ def manageRequestRegistrationCode(request):
     else: #captcha, email and username is ok
         context = {'message' : 'آفرین.'}
         return render(request,'register.html',context)
-    
+
+def manageClickingActivationLink(request):
+    context = {'message': 'روی فرم کلیک شدهو برگشته'}
+    return render(request,'register.html',context)  
 
 def manageUnknownRequest(request)  :
     context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در 20 ثانیه ثبت نام کن'}
@@ -39,8 +42,14 @@ def manageUnknownRequest(request)  :
 
 @csrf_exempt
 def register (request):
-    context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در 20 ثانیه ثبت نام کن'}
-    return render(request,'register.html',context)
+    if request.method =='POST':
+       # context = {'message': 'یک قدم به جلو برداشتی باز'}
+       # return render(request,'register.html',context)
+        return manageRequestRegistrationCode(request)
+                 
+    else:
+        #return manageClickingActivationLink(request)
+        return manageUnknownRequest(request)
    # if request.POST.has_key('requestcode'): #the client wants to register so send him a registration code
   #     return manageRequestRegistrationCode(request)
     

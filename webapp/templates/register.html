@@ -77,6 +77,7 @@
         	
             <div class="inner-bg">
                 <div class="container">
+					<!--message row-->
                     <div class="row">
                         <div class="col-sm-8 col-sm-offset-2 text">
                             <h1><strong>FeeTracker</strong> Registration Form</h1>
@@ -89,7 +90,8 @@
 								{% endif %}
                             </div>
                         </div>
-                    </div>
+					</div>
+					<!--form row-->
                     <div class="row">
                     	<div class="col-sm-6 phone">
                     		<img src="{% static 'img/iphone.png' %}" alt="">
@@ -121,10 +123,12 @@
 			                        	<input type="password" name="password" placeholder="کلمه عبور ..." class="form-last-name form-control" id="form-last-name" required pattern=".{5,}" >
 									</div>
 									<div class="form-group">
-										<label for="inputPassword3" class="sr-only" >ربات نیستید؟</label>
+											
+											<div class="g-recaptcha" data-sitekey="6LfACbYUAAAAACxB9YrHYl3rsaxVawzMoEwqVgML"></div>
+										<!--label for="inputPassword3" class="sr-only" >ربات نیستید؟</label>
 										<div class="col-sm-10">
 										  <div class="g-recaptcha" data-sitekey="6LfACbYUAAAAACxB9YrHYl3rsaxVawzMoEwqVgML"></div>
-										</div>
+										</div-->
 									  </div>
 			                        
 			                        <button type="submit" class="btn">ثبت نام!</button>
@@ -144,7 +148,7 @@
         <script src="{% static 'js/jquery.backstretch.min.js' %}"></script>
         <script src="{% static 'js/retina-1.1.0.min.js' %}"></script>
         <script src="{% static 'js/scripts.js' %}"></script>
-        
+        <script src='https://www.google.com/recaptcha/api.js'></script>
         <!--[if lt IE 10]>
             <script src="{% static 'js/placeholder.js' %}"></script>
         <![endif]-->

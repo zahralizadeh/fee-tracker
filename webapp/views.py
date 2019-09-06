@@ -13,10 +13,10 @@ from datetime import datetime
 @csrf_exempt
 def register (request):
     if request.method =='POST':
-        #TODO: start recaptcha
-        # if not grecaptcha_verify(request): #captcha is incorrect
-        # context = {'message' : 'دوست عزیز کپچا رو اشتباه زدی'}
-        # return render(request,'register.html',context)
+        #TODO: upgrade recaptcha
+        if not grecaptcha_verify(request): #captcha is incorrect
+            context = {'message' : 'دوست عزیز کپچا رو اشتباه زدی'}
+            return render(request,'register.html',context)
 
         if User.objects.filter(email = request.POST['email']).exists():
             context = {'message' : 'این ایمیل از قبل ثبت شده! '} #TODO: link to login page or resend activation code
@@ -51,17 +51,15 @@ def register (request):
             #email = request.GET['email']
             if activationcode.objects.filter(code = code).exists():
                 
-                new_temp_user = activationcode.objects.get(code = code)
-                context = {'message': 'yesssssss   '+new_temp_user.email}
-                
+                new_temp_user = activationcode.objects.get(code = code)             
                 new_user = User.objects.create(username = new_temp_user.username,password = new_temp_user.password,email = new_temp_user.email)
-                
                 token_code = get_random_string(length=48)
                 user_token = Token.objects.create(user = new_user, token = token_code)
                 activationcode.objects.filter(code = code).delete()
+                context = {'message': 'ثبت نام شما با موفقیت انجام شد. برای ادامه در سایت لاگین کنید'}
             else: 
                 context = {'message': 'متاسفانه این کد فعال سازی معتبر نمی باشد. برای عضویت در سایت دوباره فرم ثبت نام را پر کنید.'+code}
             
         except:
-            context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در 20 ثانیه ثبت نام کن'}
+            context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در کمتر از 20 ثانیه ثبت نام کن'}
         return render(request,'register.html',context)

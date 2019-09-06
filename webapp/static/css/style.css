@@ -1,6 +1,6 @@
 
 body {
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Vazir', 'Roboto', sans-serif;
     font-size: 16px;
     font-weight: 300;
     color: #888;
@@ -156,22 +156,22 @@ ul.navbar-nav {
 }
 
 .form-top-left {
-	float: left;
-	width: 75%;
-	padding-top: 25px;
-}
-
-.form-top-left h3 { margin-top: 0; }
-
-.form-top-right {
-	float: left;
+	float: right;
 	width: 25%;
-	padding-top: 5px;
+	padding-top: 25px;
 	font-size: 66px;
 	color: #ddd;
 	line-height: 100px;
-	text-align: right;
 }
+
+.form-top-right {
+    float: right;
+	width: 75%;
+    padding-top: 5px;
+    text-align: right;	
+}
+
+.form-top-rigth h3 { margin-top: 0; } 
 
 .form-bottom {
 	padding: 25px 25px 30px 25px;
@@ -188,6 +188,66 @@ ul.navbar-nav {
 	border-color: #19b9e7;
 }
 
+@font-face {
+    font-family: Vazir;
+    src: url('../fonts/Vazir.eot');
+    src: url('../fonts/Vazir.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/Vazir.woff2') format('woff2'),
+         url('../fonts/Vazir.woff') format('woff'),
+         url('../fonts/Vazir.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: Vazir;
+    src: url('../fonts/Vazir-Bold.eot');
+    src: url('../fonts/Vazir-Bold.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/Vazir-Bold.woff2') format('woff2'),
+         url('../fonts/Vazir-Bold.woff') format('woff'),
+         url('../fonts/Vazir-Bold.ttf') format('truetype');
+    font-weight: bold;
+    font-style: normal;
+}
+@font-face {
+    font-family: Vazir;
+    src: url('../fonts/Vazir-Black.eot');
+    src: url('../fonts/Vazir-Black.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/Vazir-Black.woff2') format('woff2'),
+         url('../fonts/Vazir-Black.woff') format('woff'),
+         url('../fonts/Vazir-Black.ttf') format('truetype');
+    font-weight: 900;
+    font-style: normal;
+}
+@font-face {
+    font-family: Vazir;
+    src: url('../fonts/Vazir-Medium.eot');
+    src: url('../fonts/Vazir-Medium.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/Vazir-Medium.woff2') format('woff2'),
+         url('../fonts/Vazir-Medium.woff') format('woff'),
+         url('../fonts/Vazir-Medium.ttf') format('truetype');
+    font-weight: 500;
+    font-style: normal;
+}
+@font-face {
+    font-family: Vazir;
+    src: url('../fonts/Vazir-Light.eot');
+    src: url('../fonts/Vazir-Light.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/Vazir-Light.woff2') format('woff2'),
+         url('../fonts/Vazir-Light.woff') format('woff'),
+         url('../fonts/Vazir-Light.ttf') format('truetype');
+    font-weight: 300;
+    font-style: normal;
+}
+@font-face {
+    font-family: Vazir;
+    src: url('../fonts/Vazir-Thin.eot');
+    src: url('../fonts/Vazir-Thin.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/Vazir-Thin.woff2') format('woff2'),
+         url('../fonts/Vazir-Thin.woff') format('woff'),
+         url('../fonts/Vazir-Thin.ttf') format('truetype');
+    font-weight: 100;
+    font-style: normal;
+}
 
 /***** Media queries *****/
 

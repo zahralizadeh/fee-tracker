@@ -11,8 +11,12 @@
 
         <!-- CSS -->
         <link rel="stylesheet" href="http://fonts.googleapis.com/css?family=Roboto:400,100,300,500">
-        <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" >
-		<link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}">
+		<link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}" >
+		<link rel="stylesheet" href="{% static 'css/bootstrap.css' %}" >
+		<!--link rel="stylesheet" href="{% static 'css/font-awesome.min.css' %}"-->
+		<link rel="stylesheet" href="{% static 'css/Vazir.min.css' %}">
+		<link rel="stylesheet" href="{% static 'css/Vazir.css' %}">
+
 		<link rel="stylesheet" href="{% static 'css/form-elements.css' %}">
 		<link rel="stylesheet" href="{% static 'css/style.css' %}">
 		<!--link rel="stylesheet" href="{% static '' %}"-->
@@ -37,6 +41,15 @@
 
     <body>
 {% block content %}
+		<!-- SVG -->
+		<svg style="position: absolute; width: 0; height: 0; overflow: hidden" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+			<defs>
+				<symbol id="icon-pencil" viewBox="0 0 32 32">
+					<title>pencil</title>
+					<path d="M6.482 27.429l1.625-1.625-4.196-4.196-1.625 1.625v1.911h2.286v2.286h1.911zM15.821 10.857q0-0.393-0.393-0.393-0.179 0-0.304 0.125l-9.679 9.679q-0.125 0.125-0.125 0.304 0 0.393 0.393 0.393 0.179 0 0.304-0.125l9.679-9.679q0.125-0.125 0.125-0.304zM14.857 7.429l7.429 7.429-14.857 14.857h-7.429v-7.429zM27.054 9.143q0 0.946-0.661 1.607l-2.964 2.964-7.429-7.429 2.964-2.946q0.643-0.679 1.607-0.679 0.946 0 1.625 0.679l4.196 4.179q0.661 0.696 0.661 1.625z"></path>
+				</symbol>
+			</defs>
+		</svg>
 		<!-- Top menu -->
 		<nav class="navbar navbar-inverse navbar-no-bg" role="navigation">
 			<div class="container">
@@ -58,12 +71,12 @@
 								{{ message|safe }}
 								{% endif %}
 								</span>		
-							<span class="li-social">
+							<!--span class="li-social"> UPDATE ICONS LATER
 								<a href="#"><i class="fa fa-facebook"></i></a> 
 								<a href="#"><i class="fa fa-twitter"></i></a> 
 								<a href="#"><i class="fa fa-envelope"></i></a> 
 								<a href="#"><i class="fa fa-skype"></i></a>
-							</span>
+							</span-->
 						</li>
 					</ul>
 				</div>
@@ -96,13 +109,17 @@
                     	</div>
                         <div class="col-sm-5 form-box">
                         	<div class="form-top">
+									<div class="form-top-right">
+											<h3>ثبت نام کنید</h3>
+											<p>برای دسترسی سریع از فرم زیر شروع کنید:</p>
+											
+										</div>
                         		<div class="form-top-left">
-                        			<h3>ثبت نام کنید</h3>
-                            		<p>برای دسترسی سریع از فرم زیر شروع کنید:</p>
+										<!--i class="fa fa-pencil"></i-->
+										<i><svg class="icon icon-pencil"><use xlink:href="#icon-pencil"></use></svg></i>
+                        			
                         		</div>
-                        		<div class="form-top-right">
-                        			<i class="fa fa-pencil"></i>
-                        		</div>
+                        		
                             </div>
                             <div class="form-bottom">
 			                    <form role="form" method="POST" action="{% url 'register' %}" class="registration-form">

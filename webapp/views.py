@@ -19,7 +19,7 @@ def register (request):
         # return render(request,'register.html',context)
 
         if User.objects.filter(email = request.POST['email']).exists():
-            context = {'message' : 'این ایمیل از قبل ثبت شده! '} #TODO: link to login page
+            context = {'message' : 'این ایمیل از قبل ثبت شده! '} #TODO: link to login page or resend activation code
             return render(request,'register.html',context)
     
         if User.objects.filter(username = request.POST['username']).exists():
@@ -27,7 +27,7 @@ def register (request):
             return render(request,'register.html',context)
     
         else: #captcha, email and username is ok
-            code = get_random_string(length=32)
+            code = get_random_string(length=28)
             now = datetime.now()
             username = request.POST['username']
             password = request.POST['password']
@@ -36,7 +36,12 @@ def register (request):
                 code = code, time = now)
             temporary_user.save()
             #TODO send email to user
-            context = {'message' : 'آفرین.'}
+            
+            message = 'قدیم ها ایمیل فعال سازی می فرستادیم ولی الان شرکتش ما رو تحریم کرده (: پس راحت و بی دردسر'
+            body = " برای فعال کردن اکانت بستون خود روی لینک روبرو کلیک کنید: <a href=\"?code={}\">لینک رو به رو</a> ".format(code)
+            message = message + body
+            context = {
+                'message': message }
             return render(request,'register.html',context)
                  
     else:
@@ -45,16 +50,17 @@ def register (request):
             
             #email = request.GET['email']
             if activationcode.objects.filter(code = code).exists():
-                context = {'message': code}
+                
                 new_temp_user = activationcode.objects.get(code = code)
-                new_user = User.objects.Create(username = new_temp_user.username,\
-                    password = new_temp_user.password,
-                    email = new_temp_user.email)
+                context = {'message': 'yesssssss   '+new_temp_user.email}
+                
+                new_user = User.objects.create(username = new_temp_user.username,password = new_temp_user.password,email = new_temp_user.email)
+                
                 token_code = get_random_string(length=48)
-                token = Token.objects.Create(user = new_user, token = token_code)
+                user_token = Token.objects.create(user = new_user, token = token_code)
                 activationcode.objects.filter(code = code).delete()
             else: 
-                context = {'message': 'invalid code   '+code}
+                context = {'message': 'متاسفانه این کد فعال سازی معتبر نمی باشد. برای عضویت در سایت دوباره فرم ثبت نام را پر کنید.'+code}
             
         except:
             context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در 20 ثانیه ثبت نام کن'}

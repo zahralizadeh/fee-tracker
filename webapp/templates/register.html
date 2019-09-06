@@ -53,13 +53,11 @@
 				<div class="collapse navbar-collapse" id="top-navbar-1">
 					<ul class="nav navbar-nav navbar-right">
 						<li>
-							<span class="li-text">
-								Put some text or
-							</span> 
-							<a href="#"><strong>links</strong></a> 
-							<span class="li-text">
-								here, or some icons: 
-							</span> 
+								<span class="li-text">
+								{% if message %}
+								{{ message|safe }}
+								{% endif %}
+								</span>		
 							<span class="li-social">
 								<a href="#"><i class="fa fa-facebook"></i></a> 
 								<a href="#"><i class="fa fa-twitter"></i></a> 
@@ -75,10 +73,10 @@
         <!-- Top content -->
         <div class="top-content">
         	
-            <div class="inner-bg">
+            <!--div class="inner-bg"-->
                 <div class="container">
 					<!--message row-->
-                    <div class="row">
+                    <!--div class="row">
                         <div class="col-sm-8 col-sm-offset-2 text">
                             <h1><strong>FeeTracker</strong> Registration Form</h1>
                             <div class="description">
@@ -90,7 +88,7 @@
 								{% endif %}
                             </div>
                         </div>
-					</div>
+					</div-->
 					<!--form row-->
                     <div class="row">
                     	<div class="col-sm-6 phone">
@@ -137,7 +135,8 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            <!--/div-->
+
             
         </div>
 

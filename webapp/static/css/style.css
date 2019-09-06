@@ -117,7 +117,7 @@ ul.navbar-nav {
 /***** Top content *****/
 
 .inner-bg {
-    padding: 60px 0 150px 0;
+    padding: 60px 0 10px 0;
 }
 
 .top-content .text {
@@ -203,7 +203,7 @@ ul.navbar-nav {
 	.navbar-collapse { border: 0; }
 	.navbar-toggle { margin-top: 12px; }
 	
-	.inner-bg { padding: 60px 0 110px 0; }
+	.inner-bg { padding: 60px 0 10px 0; }
 	.top-content .top-big-link { margin-top: 25px; }
 	.top-content .top-big-link a.btn { margin-top: 10px; }
 

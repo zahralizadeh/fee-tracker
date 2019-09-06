@@ -63,3 +63,34 @@ def register (request):
         except:
             context = {'message': 'برای دسترسی به امکانات سایت باید عضو باشی. در کمتر از 20 ثانیه ثبت نام کن'}
         return render(request,'register.html',context)
+
+
+@csrf_exempt
+def login (request):
+    if request.method =='POST':
+        #TODO: upgrade recaptcha
+        if not grecaptcha_verify(request): #captcha is incorrect
+            context = {'message' : 'دوست عزیز کپچا رو اشتباه زدی'}
+            return render(request,'login.html',context)
+        
+        username =  request.POST['username'] #save request parameters
+        password =  request.POST['password']
+        
+        if not User.objects.filter(email = username).exists():  #not valid email entered
+            if not User.objects.filter(username = username).exists(): #not valid email & username entered
+                message ='نام کاربری یا کلمه عبور صحیح نیست. دوباره تلاش کنید. در صورتی که قبلا حساب کاربری باز نکرده اید  <a href=\"register\">اینجا</a> کلیک کنید  '
+                context = {'message' : message}
+                return render(request,'login.html',context)
+            else: #valid username entered
+                user_account =  User.objects.get(username = username)        
+        else:  #valid email entered
+            user_account =  User.objects.get(email = username)                 
+        
+        if not user_account.password == password : #valid username but invalid password
+            message ='نام کاربری یا کلمه عبور صحیح نیست. دوباره تلاش کنید. در صورتی که قبلا حساب کاربری باز نکرده اید  <a href=\"register\">اینجا</a> کلیک کنید  '
+            context = {'message' : message}
+            return render(request,'login.html',context)        
+        else: #valid username & password
+            message = 'تبریک! با موفقیت وارد شدید'
+            context = {'message': message }
+            return render(request,'login.html',context)

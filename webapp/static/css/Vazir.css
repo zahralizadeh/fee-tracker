@@ -19,7 +19,7 @@
   stroke: currentColor;
   fill: currentColor;
 }
-.icon-pencil{
+.icon-pencil,.icon-login{
   float: left;
   margin-top: 5pt;
 }

@@ -8,10 +8,11 @@ from .utils import grecaptcha_verify
 from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
 from datetime import datetime
+import re
 # Create your views here.
 
 @csrf_exempt
-def register (request):
+def register (request): # registration for web
     if request.method =='POST':
         #TODO: upgrade recaptcha
         if not grecaptcha_verify(request): #captcha is incorrect
@@ -19,8 +20,11 @@ def register (request):
             return render(request,'register.html',context)
 
         if User.objects.filter(email = request.POST['email']).exists():
-            context = {'message' : 'این ایمیل از قبل ثبت شده! '} #TODO: link to login page or resend activation code
-            return render(request,'register.html',context)
+            message ='این ایمیل قبلا در سایت ثبت شده. برای ورود به سایت  <a href=\"login\">اینجا</a> \
+                کلیک کنید و اگر کلمه عبور خود را فراموش کردید از <a href=\"forgetpassword\">اینجا</a>\
+                     آن را بازیابی کنید.'
+            context = {'message' : message}
+            return render(request,'login.html',context)
     
         if User.objects.filter(username = request.POST['username']).exists():
             context = {'message' : 'این نام کاربری تکراریه! لطفا یکی دیگه انتخاب کن.'}
@@ -57,6 +61,7 @@ def register (request):
                 user_token = Token.objects.create(user = new_user, token = token_code)
                 activationcode.objects.filter(code = code).delete()
                 context = {'message': 'ثبت نام شما با موفقیت انجام شد. برای ادامه در سایت لاگین کنید'}
+                return render(request,'login.html',context)
             else: 
                 context = {'message': 'متاسفانه این کد فعال سازی معتبر نمی باشد. برای عضویت در سایت دوباره فرم ثبت نام را پر کنید.'+code}
             
@@ -66,7 +71,8 @@ def register (request):
 
 
 @csrf_exempt
-def login (request):
+def login (request): # login for web
+
     if request.method =='POST':
         #TODO: upgrade recaptcha
         if not grecaptcha_verify(request): #captcha is incorrect
@@ -94,3 +100,71 @@ def login (request):
             message = 'تبریک! با موفقیت وارد شدید'
             context = {'message': message }
             return render(request,'login.html',context)
+    else:
+        message = 'وارد حساب کاربری خود شوید'
+        context = {'message': message }
+        return render(request,'login.html',context)
+
+
+@csrf_exempt
+def register_webservice (request): # registration for webservice
+    if request.method =='POST':
+    
+        if User.objects.filter(email = request.POST['email']).exists():
+            return JsonResponse({'status' :  'Fail',
+                'message' : 'Email already exists.',},
+                encoder = JSONEncoder)
+    
+        if User.objects.filter(username = request.POST['username']).exists():
+            return JsonResponse({
+                'status' :  'Fail',
+                'message' : 'Username already exists.',},
+                encoder = JSONEncoder)
+    
+        else: #email and username is ok
+            code = get_random_string(length=28)
+            now = datetime.now()
+            username = request.POST['username']
+            password = request.POST['password']
+            email = request.POST['email']
+            temporary_user = activationcode(email=email,username=username,password=password,\
+                code = code, time = now)
+            temporary_user.save()
+            #TODO send email to user
+            
+           # body = " برای فعال کردن اکانت بستون خود روی لینک روبرو کلیک کنید: <a href=\"?code={}\">لینک رو به رو</a> ".format(code)
+            message = "http://localhost:8009/webservice/register\?code\={}".format(code)
+            return JsonResponse({
+                'status' : 'ok',
+                'message' : message},
+                encoder = JSONEncoder)
+        
+                 
+    else:
+        try:
+            code1 = request.GET['code']
+            code = re.sub(r'/','',code1)
+            #email = request.GET['email']
+            if activationcode.objects.filter(code = code).exists():
+                
+                new_temp_user = activationcode.objects.get(code = code)             
+                new_user = User.objects.create(username = new_temp_user.username,password = new_temp_user.password,email = new_temp_user.email)
+                token_code = get_random_string(length=48)
+                user_token = Token.objects.create(user = new_user, token = token_code)
+                activationcode.objects.filter(code = code).delete()
+                return JsonResponse({
+                'status' : 'ok',
+                'message' : 'You successfully registered'},
+                encoder = JSONEncoder)
+            else: 
+                return JsonResponse({
+                'status' :  'Fail',
+                'message' : 'Invalid activation code!!!',
+                'code' : code+'' ,},
+                encoder = JSONEncoder)
+        except:
+            message = 'error '
+    return JsonResponse({
+                'status' : 'Fail',
+                'message' : message +'Empty request'
+                },encoder = JSONEncoder)

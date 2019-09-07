@@ -1,14 +1,16 @@
 # webapp
-- [ ] login web service
+- [x] login web service
 - [ ] forget password
-- [ ] api list
+- [x] api list
 - [ ] send email to user
 - [ ] make configs hidden
+- [x] password hasher
 
 
 # logic
 - [ ] automatic scheduling 
 - [ ] change logic to read all of the sites
+- [ ] http://docs.celeryproject.org/en/latest/django/
 
 
 # userquery

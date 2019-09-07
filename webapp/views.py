@@ -10,6 +10,7 @@ from django.utils.crypto import get_random_string
 from datetime import datetime
 import re
 from django.views.decorators.http import require_POST
+from django.contrib.auth.hashers import make_password, check_password
 # Create your views here.
 
 @csrf_exempt
@@ -35,7 +36,7 @@ def register (request): # registration for web
             code = get_random_string(length=28)
             now = datetime.now()
             username = request.POST['username']
-            password = request.POST['password']
+            password = make_password(request.POST['password'])
             email = request.POST['email']
             temporary_user = activationcode(email=email,username=username,password=password,\
                 code = code, time = now)
@@ -93,7 +94,7 @@ def login (request): # login for web
         else:  #valid email entered
             user_account =  User.objects.get(email = username)                 
         
-        if not user_account.password == password : #valid username but invalid password
+        if not check_password(password,user_account.password): #valid username but invalid password
             message ='نام کاربری یا کلمه عبور صحیح نیست. دوباره تلاش کنید. در صورتی که قبلا حساب کاربری باز نکرده اید  <a href=\"register\">اینجا</a> کلیک کنید  '
             context = {'message' : message}
             return render(request,'login.html',context)        
@@ -126,7 +127,7 @@ def register_webservice (request): # webservice for registration
             code = get_random_string(length=28)
             now = datetime.now()
             username = request.POST['username']
-            password = request.POST['password']
+            password = make_password(request.POST['password'])
             email = request.POST['email']
             temporary_user = activationcode(email=email,username=username,password=password,\
                 code = code, time = now)
@@ -188,7 +189,7 @@ def login_webservice (request): # webservice for login
         else:  #valid email entered
             user_account =  User.objects.get(email = username)                 
         
-        if not user_account.password == password : #valid username but invalid password
+        if not check_password(password,user_account.password) : #valid username but invalid password
            return JsonResponse({
                 'status' : 'Fail',
                 'message' : 'Invalid username or password!'

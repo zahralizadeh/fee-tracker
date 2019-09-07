@@ -9,6 +9,7 @@ from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
 from datetime import datetime
 import re
+from django.views.decorators.http import require_POST
 # Create your views here.
 
 @csrf_exempt
@@ -107,7 +108,7 @@ def login (request): # login for web
 
 
 @csrf_exempt
-def register_webservice (request): # registration for webservice
+def register_webservice (request): # webservice for registration
     if request.method =='POST':
     
         if User.objects.filter(email = request.POST['email']).exists():
@@ -133,7 +134,7 @@ def register_webservice (request): # registration for webservice
             #TODO send email to user
             
            # body = " برای فعال کردن اکانت بستون خود روی لینک روبرو کلیک کنید: <a href=\"?code={}\">لینک رو به رو</a> ".format(code)
-            message = "http://localhost:8009/webservice/register\?code\={}".format(code)
+            message = 'http://localhost:8009/webservice/register\?code=\{}'.format(code)
             return JsonResponse({
                 'status' : 'ok',
                 'message' : message},
@@ -163,8 +164,39 @@ def register_webservice (request): # registration for webservice
                 'code' : code+'' ,},
                 encoder = JSONEncoder)
         except:
-            message = 'error '
+            message = 'error in reading code, '
     return JsonResponse({
                 'status' : 'Fail',
                 'message' : message +'Empty request'
+                },encoder = JSONEncoder)
+
+@csrf_exempt
+@require_POST
+def login_webservice (request): # webservice for login
+    if request.method =='POST':      
+        username =  request.POST['username'] #save request parameters
+        password =  request.POST['password']
+        
+        if not User.objects.filter(email = username).exists():  #not valid email entered
+            if not User.objects.filter(username = username).exists(): #not valid email & username entered
+                return JsonResponse({
+                'status' : 'Fail',
+                'message' : 'Invalid username or password!'
+                },encoder = JSONEncoder)
+            else: #valid username entered
+                user_account =  User.objects.get(username = username)        
+        else:  #valid email entered
+            user_account =  User.objects.get(email = username)                 
+        
+        if not user_account.password == password : #valid username but invalid password
+           return JsonResponse({
+                'status' : 'Fail',
+                'message' : 'Invalid username or password!'
+                },encoder = JSONEncoder)     
+        else: #valid username & password
+            this_token = Token.objects.get(user = user_account)
+            return JsonResponse({
+                'status' : 'ok',
+                'message' : 'You successfully logged in.',
+                'token' : this_token.token
                 },encoder = JSONEncoder)

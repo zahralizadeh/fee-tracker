@@ -1,14 +1,15 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from json import JSONEncoder
-from django.views.decorators.csrf import csrf_exempt
+
+import re
 import requests
-from .models import activationcode, Token
+from json import JSONEncoder
+from datetime import datetime
+from django.shortcuts import render
 from .utils import grecaptcha_verify
+from django.http import JsonResponse
+from .models import activationcode, Token
 from django.contrib.auth.models import User
 from django.utils.crypto import get_random_string
-from datetime import datetime
-import re
+from django.views.decorators.csrf import csrf_exempt
 from django.views.decorators.http import require_POST
 from django.contrib.auth.hashers import make_password, check_password
 # Create your views here.

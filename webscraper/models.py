@@ -12,13 +12,31 @@ class PropertyFile(models.Model):
     def __str__(self):
         return "{}-{}-{} متری".format('فروش' if (self.offertype == '1') else 'اجاره', self.location,self.area)
     
-class ScrapeLog(models.Model):
+class Scrape(models.Model):
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
     status = models.CharField(max_length = 20)
     resultnumber = models.IntegerField()
+    scrapetype = models.CharField(max_length = 20) # for Rent / Sell
+    site = models.CharField(max_length = 255)
+    baselink = models.CharField(max_length = 255)
+    currentlink = models.CharField(max_length = 255)
+    pagenumber = models.IntegerField()
+    pagetarget = models.IntegerField()
+    currnetrecord = models.IntegerField()
     def __str__(self):
-        return "{}-{}".format(endTime,status)
+        return "{}-{}-{}".format(self.endTime,self.status,self.scrapetype)
+
+    
+
+
+
+#class ScrapeLink(models.Model):
+  #  baselink = models.CharField(max_length = 255)
+   # link = models.CharField(max_length = 255)
+   # pagenumber = models.IntegerField()
+    #pagetarget = models.IntegerField()
+    #target = 
     
 
 

@@ -11,4 +11,15 @@ class PropertyFile(models.Model):
     age = models.IntegerField()
     def __str__(self):
         return "{}-{}-{} متری".format('فروش' if (self.offertype == '1') else 'اجاره', self.location,self.area)
+    
+class ScrapeLog(models.Model):
+    startTime = models.DateTimeField()
+    endTime = models.DateTimeField()
+    status = models.CharField(max_length = 20)
+    resultnumber = models.IntegerField()
+    def __str__(self):
+        return "{}-{}".format(endTime,status)
+    
+
+
 

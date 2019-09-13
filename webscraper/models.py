@@ -3,6 +3,7 @@ import logging
 import requests
 from bs4 import BeautifulSoup
 from django.db import models
+from datetime import datetime, timedelta
 
 
 # Create your models here.
@@ -14,53 +15,66 @@ class PropertyFile(models.Model):
     price2 = models.BigIntegerField()
     rooms = models.IntegerField()
     age = models.IntegerField()
+    publishdate = models.DateTimeField()
     def __str__(self):
         return "{}-{}-{} متری".format(self.offertype, self.location,self.area)
     
 class Scrape(models.Model):
     logger = logging.getLogger(__name__)
-    startTime = models.DateTimeField()
-    endTime = models.DateTimeField()
-    status = models.CharField(max_length = 20)
-    resultnumber = models.IntegerField()
+    startTime = models.DateTimeField(default = datetime.now)
+    endTime = models.DateTimeField(default = datetime.now)
+    status = models.CharField(max_length = 20, default = datetime.now)
     scrapetype = models.CharField(max_length = 20)  # for Rent / Sell
-    site = models.CharField(max_length = 255)   #site title for scraping
+    site = models.CharField(max_length = 255, default = 'ihome')   #site title for scraping
     baselink = models.CharField(max_length = 255)
     currentlink = models.CharField(max_length = 255)
-    pagenumber = models.IntegerField()      #number of last web page that is checked
-    pagetarget = models.IntegerField()  
-    currnetrecord = models.IntegerField()   #number of records saved in database successfully
+    pagenumber = models.IntegerField(default=1)      #number of last web page that is checked
+    pagetarget = models.IntegerField(default=1)  
+    currnetrecord = models.IntegerField(default=0)   #number of records saved in database successfully
     num_target_records = 47,496   #TODO: change the logic for end of process  #target number of records that should be saved in database  
     
     def __str__(self):
         return "{}-{}-{}".format(self.endTime,self.status,self.scrapetype)
 
     def startscraping(self):    
-        #while self.pagenumber <= self.pagetarget:
+            self.status='initialied'
+        #while self.pagenumber <= self.pagetarget and :
+        #TODO: while for read unrepeated files in less than 3 months
             self.buildlink()
-            page = requests.get(self.currentlink, verify=False)
-            soup = BeautifulSoup(page.text,'html.parser') 
-            self.logger.debug('----def models.scrape.startscraping  -----> pagenumber: %i'%(self.pagenumber))
-            if self.pagenumber == 1:
-                self.getTargetPageNumber(soup)
-            all_files = soup.find_all('li', class_ =re.compile('blocks'))
-            #extract each file and save it in the database
-            for file in all_files:
-                if(self.savePropertyFile(self.get_location(file),self.get_area(file),self.get_price(file),\
-                    self.get_rooms(file),self.get_building_age(file)) == True):
-                    self.currnetrecord += 1
-            self.pagenumber += 1
+            try:
+                page = requests.get(self.currentlink, verify=False)
+                soup = BeautifulSoup(page.text,'html.parser') 
+                self.logger.debug('----def models.scrape.startscraping  -----> pagenumber: %i'%(self.pagenumber))
+                if self.pagenumber == 1:
+                    self.getTargetPageNumber(soup)
+                all_files = soup.find_all('li', class_ =re.compile('blocks'))
+                #extract each file and save it in the database
+                for file in all_files:
+                    if(self.savePropertyFile(self.get_location(file),self.get_area(file),self.get_price(file),\
+                        self.get_rooms(file),self.get_building_age(file),self.calculate_date(self.get_date(file))) == True):
+                        self.currnetrecord += 1
+                self.pagenumber += 1
+            except:
+                self.status = 'error in reading page %i'%self.pagenumber
+                
+            #after while
+            self.endTime = datetime.today()
+            if self.status =='initialied':
+                self.status = 'success'
+            if self.pagenumber>1:
+                self.pagenumber = self.pagenumber - 1   
+            return True
 
     def buildlink(self):
-        self.baselink = 'https://www.%s.ir/%s/املاک/تهران/'%(self.site,self.scrapetype)
+        self.baselink = 'https://www.%s.ir/%s/املاک/تهران'%(self.site,self.scrapetype)
+        if self.site == 'ihome':
+            sort_statement  = '?&sort=date_desc'
         if self.pagenumber > 1:
-            self.currentlink = self.baselink + '/%i/'%(self.pagenumber)
+            self.currentlink = self.baselink + '/%i/'%(self.pagenumber) + sort_statement
         else:
-            self.currentlink = self.baselink
+            self.currentlink = self.baselink + sort_statement
         self.logger.debug('----def models.scrape.startscraping  -----> link: '+self.currentlink)
-
-
-            
+         
     def getTargetPageNumber(self,soup):
         records_info = soup.find('div',class_='right pg_counts').get_text(strip=True).replace(',','').split()
         self.logger.debug('----def models.scrape.firstpage  -----> records_info: %s'%(records_info))
@@ -73,38 +87,30 @@ class Scrape(models.Model):
             self.logger.debug('----def models.scrape.firstpage  -----> pagetarget:%i'%(self.pagetarget))
         except:
             self.logger.debug('----def models.scrape.firstpage  ----->  Exception in calculating target page')
-            self.status = 'error'                
+            self.status = 'error in get Target Page Number'                
         
-    def savePropertyFile (self,location,area,price,rooms,age):
-        self.logger.debug('----def models.scrape.savePropertyFile  -----> location:%s'%(location))
-        self.logger.debug('----def models.scrape.savePropertyFile  -----> area:%s'%(area))
-        self.logger.debug('----def models.scrape.savePropertyFile  -----> price:%s'%(price[0]))
-        self.logger.debug('----def models.scrape.savePropertyFile  -----> rooms:%s'%(rooms))
-        self.logger.debug('----def models.scrape.savePropertyFile  -----> age:%s'%(age))
+    def savePropertyFile (self,location,area,price,rooms,age,date):
+        if date[0]==False:
+            self.logger.debug('----def models.scrape.savePropertyFile: -----> verify date:FALSE')
+            return(False)
+        self.logger.debug('----def models.scrape.calculate_date  -----> verify date:%s'%(date[1]))
 
         if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
             if price[0] > 0 and rooms > 0 and area > 0:
-                #thisFile = PropertyFile.objects.create(\
-                #    offertype = self.scrapetype,\
-                #    location = location,\
-                 #   area = area,\
-                 #   price1 = price[0],\
-                 #   price2 = 0,\
-                 #   rooms = rooms,\
-                 #   age = age)
                 this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
-                    price1 = price[0], price2 = 0,rooms = rooms,age = age )
-                this_file.save()
-                #thisFile = PropertyFile(self.scrapetype,location,area,price[0],0,rooms,age)
-                #thisFile.save()                
+                    price1 = price[0], price2 = 0,rooms = rooms,age = age, publishdate = date[1] )
+                    #price1 = price[0], price2 = 0,rooms = rooms,age = age )
+                this_file.save()               
                 return(True)
             return(False)
         elif self.scrapetype == 'رهن-اجاره': #save data in database for RENT cases
             if price == [0,0] or rooms == 0 or area == 0:  #means data is not valid and usefull 
                 return(False)
             else:
-                thisFile = PropertyFile(self.scrapetype,location,area,price[0],price[1],rooms,age)
-                thisFile.save() 
+                this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
+                    price1 = price[0], price2 = price[1],rooms = rooms,age = age, publishdate = date[1] )
+                    #price1 = price[0], price2 = price[1],rooms = rooms,age = age )
+                this_file.save() 
                 return(True)
 
     def get_location(self,file):
@@ -161,6 +167,48 @@ class Scrape(models.Model):
         except:
             return 0
 
+    def get_date(self,file):
+        d = file.find('span',class_ = 'date left')
+        try:
+            d.span.extract()
+            date_str = d.get_text(strip = True)   
+        except:
+            date_str = 'now'
+        self.logger.debug('----def models.scrape.get_date  -----> date:%s'%(date_str))
+        return date_str
+    
+    def calculate_date(self,date_str):
+        delta = self.extract_digit(date_str)
+        validation = True
+        if delta == 0:   # the publishdate is not valid - this file will not save in database
+            validation = False
+            return [validation, datetime.today() - timedelta(years=1)]
+        if re.search(r'دقیقه',date_str):  
+            real_date = datetime.today() - timedelta(minutes=delta)
+        elif re.search(r'ساعت',date_str):  
+            real_date = datetime.today() - timedelta(hours=delta)
+        elif re.search(r'روز',date_str):  
+            real_date = datetime.today() - timedelta(days=delta)
+        elif re.search(r'هفته',date_str):
+            delta = 7 * delta  
+            real_date = datetime.today() - timedelta(days=delta)
+        elif re.search(r'بیش از',date_str):  # its over 6 months - this file will not save in database
+            validation = False
+            real_date = datetime.today() - timedelta(years=1)
+        elif re.search(r'ماه',date_str):  
+            real_date = datetime.today() - timedelta(months=delta)
+        else:
+            real_date = datetime.today() 
+        return [validation,real_date]
+
+    def extract_digit(self,my_str):
+        digits = re.findall(r'\d+',my_str)
+        try:
+            return int(digits[0])
+        except:
+            self.logger.debug('----def models.scrape.extract_digit exception in extracting digit from %s'%my_str)
+            return 0
+        
 
 
 #class ScrapeLink(models.Model):

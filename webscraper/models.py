@@ -4,6 +4,8 @@ import requests
 from bs4 import BeautifulSoup
 from django.db import models
 from datetime import datetime, timedelta
+from django.utils.timezone import make_aware
+
 
 
 # Create your models here.
@@ -21,9 +23,9 @@ class PropertyFile(models.Model):
     
 class Scrape(models.Model):
     logger = logging.getLogger(__name__)
-    startTime = models.DateTimeField(default = datetime.now)
-    endTime = models.DateTimeField(default = datetime.now)
-    status = models.CharField(max_length = 20, default = datetime.now)
+    startTime = models.DateTimeField(default = make_aware(datetime.now()))
+    endTime = models.DateTimeField(default = make_aware(datetime.now()))
+    status = models.CharField(max_length = 20 , default= 'initialied')
     scrapetype = models.CharField(max_length = 20)  # for Rent / Sell
     site = models.CharField(max_length = 255, default = 'ihome')   #site title for scraping
     baselink = models.CharField(max_length = 255)
@@ -58,7 +60,7 @@ class Scrape(models.Model):
                 self.status = 'error in reading page %i'%self.pagenumber
                 
             #after while
-            self.endTime = datetime.today()
+            self.endTime = make_aware(datetime.now())
             if self.status =='initialied':
                 self.status = 'success'
             if self.pagenumber>1:
@@ -98,8 +100,7 @@ class Scrape(models.Model):
         if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
             if price[0] > 0 and rooms > 0 and area > 0:
                 this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
-                    price1 = price[0], price2 = 0,rooms = rooms,age = age, publishdate = date[1] )
-                    #price1 = price[0], price2 = 0,rooms = rooms,age = age )
+                    price1 = price[0], price2 = 0,rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save()               
                 return(True)
             return(False)
@@ -108,8 +109,7 @@ class Scrape(models.Model):
                 return(False)
             else:
                 this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
-                    price1 = price[0], price2 = price[1],rooms = rooms,age = age, publishdate = date[1] )
-                    #price1 = price[0], price2 = price[1],rooms = rooms,age = age )
+                    price1 = price[0], price2 = price[1],rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save() 
                 return(True)
 
@@ -182,23 +182,23 @@ class Scrape(models.Model):
         validation = True
         if delta == 0:   # the publishdate is not valid - this file will not save in database
             validation = False
-            return [validation, datetime.today() - timedelta(years=1)]
+            return [validation, datetime.now() - timedelta(years=1)]
         if re.search(r'دقیقه',date_str):  
-            real_date = datetime.today() - timedelta(minutes=delta)
+            real_date = datetime.now() - timedelta(minutes=delta)
         elif re.search(r'ساعت',date_str):  
-            real_date = datetime.today() - timedelta(hours=delta)
+            real_date = datetime.now() - timedelta(hours=delta)
         elif re.search(r'روز',date_str):  
-            real_date = datetime.today() - timedelta(days=delta)
+            real_date = datetime.now() - timedelta(days=delta)
         elif re.search(r'هفته',date_str):
             delta = 7 * delta  
-            real_date = datetime.today() - timedelta(days=delta)
+            real_date = datetime.now() - timedelta(days=delta)
         elif re.search(r'بیش از',date_str):  # its over 6 months - this file will not save in database
             validation = False
-            real_date = datetime.today() - timedelta(years=1)
+            real_date = datetime.now() - timedelta(years=1)
         elif re.search(r'ماه',date_str):  
-            real_date = datetime.today() - timedelta(months=delta)
+            real_date = datetime.now() - timedelta(months=delta)
         else:
-            real_date = datetime.today() 
+            real_date = datetime.now() 
         return [validation,real_date]
 
     def extract_digit(self,my_str):

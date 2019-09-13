@@ -14,7 +14,7 @@ def collectdata(request):
     logger.debug("----def collectdata ----->  is running")
     last_property = PropertyFile.objects.all().aggregate(Max('publishdate'))
     first_property = PropertyFile.objects.all().aggregate(Min('publishdate'))
-
+    
     logger.debug("----def collectdata last saved property is published on  ----->  %s"%last_property)
     logger.debug("----def collectdata last saved property is published on  ----->  %s"%first_property)
 

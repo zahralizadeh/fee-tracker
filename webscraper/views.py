@@ -11,23 +11,35 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 def collectdata(request):
-    logger.debug("----def collectdata ----->  is running")
+    logger.debug("----def collectdata BUY ----->  is running")
     try:    #property database is not empty
-        last_property_time = PropertyFile.objects.order_by('-publishdate')[0].publishdate
-        first_property = PropertyFile.objects.order_by('publishdate')[0].publishdate
-    
-        logger.debug("----def collectdata, the last saved property is published on  ----->  %s"%last_property_time)
-        logger.debug("----def collectdata, the first last property is published on  ----->  %s"%first_property)
-
-        scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_property_time)
+        last_buy_property_time = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('-publishdate')[0].publishdate
+        scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_buy_property_time)
         if scrapeIhomeBuy.startscraping_update():
             scrapeIhomeBuy.save()
-        return HttpResponse('Hi...we are going to Store information about the house you want in database!')
+        response = 'Hi...I saved information about offertype = Buy in database!'    
     except: 
-        if  not PropertyFile.objects.all(): #property database is  empty
+        if  not PropertyFile.objects.filter(offertype ='خرید-فروش'): #property database is  empty
             scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
             if scrapeIhomeBuy.startscraping_update():
                 scrapeIhomeBuy.save() 
-                return HttpResponse('Hi...Database was empty! Data published in the last month was scraped successfully!')
-        return HttpResponse('Hi...There was an error in process of collecting data!')
-
+                response ='Hi...There was no BUY files saved in DB! Data published in the last month was scraped successfully!'
+        else:
+            response = 'Hi...There was an error in process of collecting  BUY data!'
+    
+    logger.debug("----def collectdata RENT ----->  is running")
+    try:
+        last_rent_property_time = PropertyFile.objects.filter(offertype ='رهن-اجاره').order_by('-publishdate')[0].publishdate
+        scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=last_rent_property_time)
+        if scrapeIhomeRent.startscraping_update():
+            scrapeIhomeRent.save()
+        response = response +'\n I saved information about offertype = Rent in database!'
+    except: 
+        if  not PropertyFile.objects.filter(offertype ='رهن-اجاره'): #property database is  empty
+            scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
+            if scrapeIhomeRent.startscraping_update():
+                scrapeIhomeRent.save() 
+                response = response +'\n There was no RENT files saved in DB! Data published in the last month was scraped successfully!'
+        else:
+            response = response + '\n There was an error in process of collecting  RENT data!'
+    return HttpResponse(response)

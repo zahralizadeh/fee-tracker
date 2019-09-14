@@ -41,6 +41,7 @@ class Scrape(models.Model):
 
     def startscraping_update(self):    
         self.status='initialied'
+        self.logger.debug("----def startscraping_update, the last saved property is published on  ----->  %s"%(self.last_update_time))
         last_property_time = make_aware(datetime.now())
         while (self.pagenumber <= self.pagetarget) and (last_property_time >= self.last_update_time):
             #TODO: ihome sort on date is not accurate
@@ -180,7 +181,7 @@ class Scrape(models.Model):
             date_str = d.get_text(strip = True)   
         except:
             date_str = 'now'
-        #self.logger.debug('----def models.scrape.get_date  -----> date:%s'%(date_str))
+        self.logger.debug('----def models.scrape.get_date  -----> date:%s'%(date_str))
         return date_str
     
     def calculate_date(self,date_str):

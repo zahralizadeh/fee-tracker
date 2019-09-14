@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'webapp',
     'webscraper',
+    'django_cron',
 ]
 
 MIDDLEWARE = [
@@ -51,6 +52,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+]
+
+CRON_CLASSES = [
+    'webscraper.cron.AutoCollectData',
 ]
 
 ROOT_URLCONF = 'feetracker.urls'

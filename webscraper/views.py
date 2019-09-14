@@ -3,7 +3,6 @@ import requests
 import logging
 from django.shortcuts import render
 from django.http import HttpResponse
-from django.db.models import Max,Min 
 from datetime import datetime,timedelta
 from .models import Scrape, PropertyFile
 from django.utils.timezone import make_aware
@@ -25,10 +24,10 @@ def collectdata(request):
             scrapeIhomeBuy.save()
         return HttpResponse('Hi...we are going to Store information about the house you want in database!')
     except: 
-        if  not PropertyFile.objects.all():
+        if  not PropertyFile.objects.all(): #property database is  empty
             scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
             if scrapeIhomeBuy.startscraping_update():
                 scrapeIhomeBuy.save() 
-                return HttpResponse('Hi...Database was empty! last onth Data scraped successfully!')
+                return HttpResponse('Hi...Database was empty! Data published in the last month was scraped successfully!')
         return HttpResponse('Hi...There was an error in process of collecting data!')
 

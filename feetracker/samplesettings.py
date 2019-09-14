@@ -152,15 +152,19 @@ LOGGING = {
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
+       'django': {
+            'handlers': ['file'],
             'level': os.getenv('DJANGO_LOG_LEVEL', 'DEBUG'),
         },
-        'web': {
-            'handlers': ['console', 'filelogger'],
+        'webapp': {
+            'handlers': ['filelogger'],
             'level': 'DEBUG',
         },
         'groups': {
+            'handlers': ['filelogger'],
+            'level': 'DEBUG',
+        },
+        'webscraper': {
             'handlers': ['console', 'filelogger'],
             'level': 'DEBUG',
         },

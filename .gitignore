@@ -3,6 +3,7 @@ venv/
 .vscode/
 *.sqlite3
 .pyc
+*.exe.stackdump
 ### OSX ###
 .DS_Store
 .AppleDouble

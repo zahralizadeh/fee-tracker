@@ -9,20 +9,18 @@
 
 # logic
 - [ ] automatic scheduling 
-- [ ] change logic to read all of the sites
+- [x] change logic to read all of the sites
 - [ ] http://docs.celeryproject.org/en/latest/django/
 - [ ] https://www.geeksforgeeks.org/python-schedule-library/
-- [ ] check data and collect data since last update automaatically
-- [ ] if database is clean admin must run first data collecting (authentication needed)
-- [ ] add authentication for collecting specific
+- [x] check data and collect data since last update automaatically
+- [x] if database is clean first data collecting will run
 - [ ] delete old files from database
-
-
 
 # userquery
 - [ ] handle user request
 - [ ] save user request
 - [ ] webservice  user request
+- [ ] autentication is complosory for sending request
 
 # Documentation
 - [ ] webscrape model

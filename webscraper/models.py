@@ -33,40 +33,45 @@ class Scrape(models.Model):
     pagenumber = models.IntegerField(default=1)      #number of last web page that is checked
     pagetarget = models.IntegerField(default=1)  
     currnetrecord = models.IntegerField(default=0)   #number of records saved in database successfully
-    last_update_time = models.DateTimeField()   # time treshhold of last update
+    last_update_time = models.DateTimeField(default = make_aware(datetime.now()))   # time treshhold of last update
     num_target_records = 47,496   #TODO: change the logic for end of process  #target number of records that should be saved in database  
     
     def __str__(self):
-        return "{}-{}-{}".format(self.endTime,self.status,self.scrapetype)
+        return "{}-{}-{}-{}-{}".format(self.endTime,self.status,self.scrapetype,self.currnetrecord,'تهران')
 
     def startscraping_update(self):    
-            self.status='initialied'
-        #while self.pagenumber <= self.pagetarget and :
-        #TODO: while for read unrepeated files in less than 3 months
+        self.status='initialied'
+        last_property_time = make_aware(datetime.now())
+        while (self.pagenumber <= self.pagetarget) and (last_property_time >= self.last_update_time):
+            #TODO: ihome sort on date is not accurate
             self.buildlink()
             try:
                 page = requests.get(self.currentlink, verify=False)
                 soup = BeautifulSoup(page.text,'html.parser') 
                 self.logger.debug('----def models.scrape.startscraping  -----> pagenumber: %i'%(self.pagenumber))
-                if self.pagenumber == 1:
+                if self.pagenumber == 1:    #in first page, calculate number of pages
                     self.getTargetPageNumber(soup)
                 all_files = soup.find_all('li', class_ =re.compile('blocks'))
                 #extract each file and save it in the database
                 for file in all_files:
-                    if(self.savePropertyFile(self.get_location(file),self.get_area(file),self.get_price(file),\
-                        self.get_rooms(file),self.get_building_age(file),self.calculate_date(self.get_date(file))) == True):
+                    result = self.savePropertyFile(self.get_location(file),self.get_area(file),self.get_price(file),\
+                        self.get_rooms(file),self.get_building_age(file),self.calculate_date(self.get_date(file)))
+                    if result[0]== True:    #if file saved successfully .... 
                         self.currnetrecord += 1
-                self.pagenumber += 1
+                        last_property_time = result[1]  # publish date of file will be recorded in last_property_time
+                self.pagenumber += 1  #this page in scraped, go to next page
+                self.logger.debug('----def models.scrape.startscraping  -----> last_property_time: %s'%(last_property_time))
             except:
                 self.status = 'error in reading page %i'%self.pagenumber
                 
-            #after while
-            self.endTime = make_aware(datetime.now())
-            if self.status =='initialied':
-                self.status = 'success'
-            if self.pagenumber>1:
-                self.pagenumber = self.pagenumber - 1   
-            return True
+        #scraping is finished, finalize the scrape log and save it in database
+        self.logger.debug('----def models.scrape.startscraping  -----> end of scraping ')
+        self.endTime = make_aware(datetime.now())
+        if self.status =='initialied':
+            self.status = 'success'
+        if self.pagenumber>1:
+            self.pagenumber = self.pagenumber - 1   
+        return True
 
     def buildlink(self):
         self.baselink = 'https://www.%s.ir/%s/املاک/تهران'%(self.site,self.scrapetype)
@@ -95,24 +100,24 @@ class Scrape(models.Model):
     def savePropertyFile (self,location,area,price,rooms,age,date):
         if date[0]==False:
             self.logger.debug('----def models.scrape.savePropertyFile: -----> verify date:FALSE')
-            return(False)
-        self.logger.debug('----def models.scrape.calculate_date  -----> verify date:%s'%(date[1]))
+            return([False , ''])
 
         if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
             if price[0] > 0 and rooms > 0 and area > 0:
                 this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
                     price1 = price[0], price2 = 0,rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save()               
-                return(True)
-            return(False)
+                self.logger.debug('----def models.scrape.calculate_date  -----> date saved:%s'%(date[1]))
+                return([True , make_aware(date[1])])
+            return([False , ''])
         elif self.scrapetype == 'رهن-اجاره': #save data in database for RENT cases
             if price == [0,0] or rooms == 0 or area == 0:  #means data is not valid and usefull 
-                return(False)
+                return([False , ''])
             else:
                 this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
                     price1 = price[0], price2 = price[1],rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save() 
-                return(True)
+                return([True , make_aware(date[1])])
 
     def get_location(self,file):
         return file.find('div',class_='location').span.extract().get_text(strip=True)
@@ -175,7 +180,7 @@ class Scrape(models.Model):
             date_str = d.get_text(strip = True)   
         except:
             date_str = 'now'
-        self.logger.debug('----def models.scrape.get_date  -----> date:%s'%(date_str))
+        #self.logger.debug('----def models.scrape.get_date  -----> date:%s'%(date_str))
         return date_str
     
     def calculate_date(self,date_str):
@@ -183,7 +188,8 @@ class Scrape(models.Model):
         validation = True
         if delta == 0:   # the publishdate is not valid - this file will not save in database
             validation = False
-            return [validation, datetime.now() - timedelta(years=1)]
+            self.logger.debug('----def models.scrape.calculate_date the publishdate is not valid')
+            return [validation, datetime.now() - timedelta(days=365)]
         if re.search(r'دقیقه',date_str):  
             real_date = datetime.now() - timedelta(minutes=delta)
         elif re.search(r'ساعت',date_str):  
@@ -195,9 +201,9 @@ class Scrape(models.Model):
             real_date = datetime.now() - timedelta(days=delta)
         elif re.search(r'بیش از',date_str):  # its over 6 months - this file will not save in database
             validation = False
-            real_date = datetime.now() - timedelta(years=1)
+            real_date = datetime.now() - timedelta(days=365)
         elif re.search(r'ماه',date_str):  
-            real_date = datetime.now() - timedelta(months=delta)
+            real_date = datetime.now() - timedelta(days=delta*30)
         else:
             real_date = datetime.now() 
         return [validation,real_date]

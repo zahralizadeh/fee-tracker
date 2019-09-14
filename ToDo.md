@@ -8,11 +8,11 @@
 
 
 # logic
-- [ ] automatic scheduling 
+- [x] automatic scheduling 
 - [x] change logic to read all of the sites
-- [ ] http://docs.celeryproject.org/en/latest/django/
-- [ ] https://www.geeksforgeeks.org/python-schedule-library/
-- [x] check data and collect data since last update automaatically
+- [x] https://www.geeksforgeeks.org/python-schedule-library/
+- [x] https://django-cron.readthedocs.io/en/latest/installation.html
+- [x] check data and collect data since last update automatically
 - [x] if database is clean first data collecting will run
 - [ ] delete old files from database
 
@@ -24,6 +24,10 @@
 
 # Documentation
 - [ ] webscrape model
+
+# Server Side
+- [ ] https://stackoverflow.com/questions/46385350/django-cron-task-not-executing-automatically
+
 
 
 

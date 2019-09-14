@@ -33,12 +33,13 @@ class Scrape(models.Model):
     pagenumber = models.IntegerField(default=1)      #number of last web page that is checked
     pagetarget = models.IntegerField(default=1)  
     currnetrecord = models.IntegerField(default=0)   #number of records saved in database successfully
+    last_update_time = models.DateTimeField()   # time treshhold of last update
     num_target_records = 47,496   #TODO: change the logic for end of process  #target number of records that should be saved in database  
     
     def __str__(self):
         return "{}-{}-{}".format(self.endTime,self.status,self.scrapetype)
 
-    def startscraping(self):    
+    def startscraping_update(self):    
             self.status='initialied'
         #while self.pagenumber <= self.pagetarget and :
         #TODO: while for read unrepeated files in less than 3 months

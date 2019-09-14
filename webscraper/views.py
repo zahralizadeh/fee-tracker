@@ -15,7 +15,7 @@ def collectdata(request):
     last_property_time = PropertyFile.objects.all().aggregate(Max('publishdate'))
     first_property = PropertyFile.objects.all().aggregate(Min('publishdate'))
     
-    logger.debug("----def collectdata last saved property is published on  ----->  %s"%last_property)
+    logger.debug("----def collectdata last saved property is published on  ----->  %s"%last_property_time)
     logger.debug("----def collectdata last saved property is published on  ----->  %s"%first_property)
 
     scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش')

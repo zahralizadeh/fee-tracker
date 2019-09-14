@@ -18,8 +18,8 @@ class AutoCollectData(CronJobBase):
     def do(self):
         logger.debug("----AutoCollectData ----->  is running")
         try:    #property database is not empty
-            last_property_time = PropertyFile.objects.order_by('-publishdate')[0].publishdate
-            first_property = PropertyFile.objects.order_by('publishdate')[0].publishdate
+            last_property_time = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('-publishdate')[0].publishdate
+            first_property = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('publishdate')[0].publishdate
     
             logger.debug("----AutoCollectData, the last saved property is published on  ----->  %s"%last_property_time)
             logger.debug("----AutoCollectData, the first last property is published on  ----->  %s"%first_property)
@@ -28,7 +28,7 @@ class AutoCollectData(CronJobBase):
             if scrapeIhomeBuy.startscraping_update():
                 scrapeIhomeBuy.save()
         except: 
-            if  not PropertyFile.objects.all(): #property database is  empty
+            if  not PropertyFile.objects.filter(offertype ='خرید-فروش'): #property database is  empty
                 scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
                 if scrapeIhomeBuy.startscraping_update():
                     scrapeIhomeBuy.save() 

@@ -18,20 +18,47 @@ class AutoCollectData(CronJobBase):
     def do(self):
         logger.debug("----AutoCollectData ----->  is running")
         try:    #property database is not empty
-            last_property_time = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('-publishdate')[0].publishdate
-            first_property = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('publishdate')[0].publishdate
-    
-            logger.debug("----AutoCollectData, the last saved property is published on  ----->  %s"%last_property_time)
-            logger.debug("----AutoCollectData, the first last property is published on  ----->  %s"%first_property)
-
-            scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_property_time)
+            last_buy_property_time = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('-publishdate')[0].publishdate
+            scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_buy_property_time)
             if scrapeIhomeBuy.startscraping_update():
                 scrapeIhomeBuy.save()
+                logger.debug('----AutoCollectData ----->I saved information about offertype = Buy in database!')
+            else: 
+                scrapeIhomeBuy.save() 
+                logger.debug('----AutoCollectData ----->ERROR in startscraping_update!') 
         except: 
             if  not PropertyFile.objects.filter(offertype ='خرید-فروش'): #property database is  empty
                 scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
                 if scrapeIhomeBuy.startscraping_update():
                     scrapeIhomeBuy.save() 
-                logger.debug('----AutoCollectData ----->  Database was empty! Data published in the last month was scraped successfully!')
+                    logger.debug('----AutoCollectData ----->There was no BUY files saved in DB! Data published in the\
+                         last month was scraped successfully!')
+                else:
+                    scrapeIhomeBuy.save()
+                    logger.debug('----AutoCollectData -----> There was no BUY files saved in DB! ERROR in startscraping_update!')
             else:
-                logger.debug('----AutoCollectData ----->  There was an unknown error in process of collecting data!!')
+                logger.debug('----AutoCollectData ----->There was an error in process of collecting  BUY data!')
+    
+        logger.debug("----AutoCollectData ----->  is running")
+        try:
+            last_rent_property_time = PropertyFile.objects.filter(offertype ='رهن-اجاره').order_by('-publishdate')[0].publishdate
+            scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=last_rent_property_time)
+            if scrapeIhomeRent.startscraping_update():
+                scrapeIhomeRent.save()
+                logger.debug('----AutoCollectData ----->I saved information about offertype = Rent in database!')
+            else: 
+                scrapeIhomeBuy.save() 
+                logger.debug('----AutoCollectData ----->ERROR in startscraping_update!')
+        except: 
+            if  not PropertyFile.objects.filter(offertype ='رهن-اجاره'): #property database is  empty
+                scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
+                if scrapeIhomeRent.startscraping_update():
+                    scrapeIhomeRent.save() 
+                    logger.debug('----AutoCollectData ----->There was no RENT files saved in DB! Data published in the last month was scraped successfully!')
+                else: 
+                    scrapeIhomeBuy.save() 
+                    logger.debug('----AutoCollectData ----->There was no RENT files saved in DB! ERROR in startscraping_update!')
+            else:
+                logger.debug('----AutoCollectData ----->There was an error in process of collecting  RENT data!')
+        logger.debug('----AutoCollectData -----> %s'%response)
+    

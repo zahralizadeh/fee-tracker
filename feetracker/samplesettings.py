@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'webapp',
     'webscraper',
+    'queryhandler',
     'django_cron',
 ]
 
@@ -171,6 +172,10 @@ LOGGING = {
             'level': 'DEBUG',
         },
         'webscraper': {
+            'handlers': ['console', 'filelogger'],
+            'level': 'DEBUG',
+        },
+        'queryhandler': {
             'handlers': ['console', 'filelogger'],
             'level': 'DEBUG',
         },

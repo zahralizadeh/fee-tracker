@@ -6,6 +6,39 @@ from django_cron import CronJobBase, Schedule
 
 logger = logging.getLogger(__name__)
 
+class AutoCleanDB(CronJobBase):
+    #RUN_EVERY_MINS = 120 # every 2 hours
+    #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+
+    RUN_AT_TIMES = ['4:02']
+    schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    
+    code = 'webscraper.AutoCleanDB'    # a unique code
+
+    def do(self):
+        logger.debug("----AutoCleanDB ----->  is running")
+
+        # stage 1: delete old data
+        logger.debug("----AutoCleanDB ----->   (stage 1):")
+        treshhold = datetime.now() - timedelta(days=90)
+        old_files = PropertyFile.objects.filter(publishdate__lt=make_aware(treshhold))
+        logger.debug("----AutoCleanDB ----->  (stage 1): %i files deleted."%old_files.count())
+        old_files.delete()
+
+        # stage 2: delete redundant data
+        logger.debug("----AutoCleanDB ----->   (stage 2):")
+        count = 0
+        for row in PropertyFile.objects.all():
+            if MyModePropertyFilel.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
+                price1 = row.price1, price2 = row.price2, rooms = row.rooms, age = row.age).count() > 1:
+                logger.debug("----AutoCleanDB ----->  (stage 2): offertype:%s location:%s area:%i age:%i Deleted!!!"\
+                    %(row.offertype,row.location,row.area,row.age))
+                row.delete()
+                count += 1
+        logger.debug("----AutoCleanDB ----->  (stage 2): %i files deleted."%count())
+
+
+
 class AutoCollectData(CronJobBase):
     #RUN_EVERY_MINS = 120 # every 2 hours
     #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)

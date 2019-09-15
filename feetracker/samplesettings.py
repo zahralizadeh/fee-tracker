@@ -56,6 +56,7 @@ MIDDLEWARE = [
 
 CRON_CLASSES = [
     'webscraper.cron.AutoCollectData',
+    'webscraper.cron.AutoCleanDB',
 ]
 
 ROOT_URLCONF = 'feetracker.urls'

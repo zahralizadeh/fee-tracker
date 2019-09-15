@@ -21,4 +21,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     url(r'collectdata/', include('webscraper.urls')),
     url(r'account/', include('webapp.urls')),
+    url(r'query/', include('queryhandler.urls')),
+    url(r'', include('webapp.urls')),
+
 ]

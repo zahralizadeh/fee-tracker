@@ -29,14 +29,13 @@ class AutoCleanDB(CronJobBase):
         logger.debug("----AutoCleanDB ----->   (stage 2):")
         count = 0
         for row in PropertyFile.objects.all():
-            if MyModePropertyFilel.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
+            if PropertyFilel.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
                 price1 = row.price1, price2 = row.price2, rooms = row.rooms, age = row.age).count() > 1:
                 logger.debug("----AutoCleanDB ----->  (stage 2): offertype:%s location:%s area:%i age:%i Deleted!!!"\
                     %(row.offertype,row.location,row.area,row.age))
                 row.delete()
                 count += 1
         logger.debug("----AutoCleanDB ----->  (stage 2): %i files deleted."%count())
-
 
 
 class AutoCollectData(CronJobBase):

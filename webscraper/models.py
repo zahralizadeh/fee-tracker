@@ -227,13 +227,4 @@ class Scrape(models.Model):
         
 
 
-#class ScrapeLink(models.Model):
-  #  baselink = models.CharField(max_length = 255)
-   # link = models.CharField(max_length = 255)
-   # pagenumber = models.IntegerField()
-    #pagetarget = models.IntegerField()
-    #target = 
-    
-
-
 

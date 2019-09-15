@@ -41,7 +41,7 @@ class Scrape(models.Model):
 
     def startscraping_update(self):    
         self.status='initialied'
-        self.logger.debug("----def startscraping_update, the last saved property is published on  ----->  %s"%(self.last_update_time))
+        self.logger.debug("----def startscraping_update, Due Date is  ----->  %s"%(self.last_update_time))
         last_property_time = make_aware(datetime.now())
         while (self.pagenumber <= self.pagetarget) and (last_property_time >= self.last_update_time):
             #TODO: ihome sort on date is not accurate
@@ -60,19 +60,24 @@ class Scrape(models.Model):
                     if result[0]== True:    #if file saved successfully .... 
                         self.currnetrecord += 1
                         last_property_time = result[1]  # publish date of file will be recorded in last_property_time
-                self.pagenumber += 1  #this page in scraped, go to next page
                 self.logger.debug('----def models.scrape.startscraping  -----> last_property_time: %s'%(last_property_time))
             except:
                 self.status = 'error in reading page %i'%self.pagenumber
+            self.pagenumber = self.pagenumber + 1  #this page in scraped, go to next page
                 
         #scraping is finished, finalize the scrape log and save it in database
-        self.logger.debug('----def models.scrape.startscraping  -----> end of scraping ')
-        self.endTime = make_aware(datetime.now())
-        if self.status =='initialied':
-            self.status = 'success'
-        if self.pagenumber>1:
-            self.pagenumber = self.pagenumber - 1   
-        return True
+        try:
+            self.logger.debug('----startscraping  -----> end of scraping. number of saved records: %i'%(self.currnetrecord))
+            self.endTime = make_aware(datetime.now())
+            if self.status =='initialied':
+                self.status = 'success'
+            if self.pagenumber>1:
+                self.pagenumber = self.pagenumber - 1   
+            return True
+        except:
+            if self.status =='initialied':
+                self.status = 'ERROR'
+            return False
 
     def buildlink(self):
         self.baselink = 'https://www.%s.ir/%s/املاک/تهران'%(self.site,self.scrapetype)
@@ -108,16 +113,19 @@ class Scrape(models.Model):
                 this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
                     price1 = price[0], price2 = 0,rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save()               
-                self.logger.debug('----def models.scrape.calculate_date  -----> date saved:%s'%(date[1]))
+                self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
                 return([True , make_aware(date[1])])
             return([False , ''])
         elif self.scrapetype == 'رهن-اجاره': #save data in database for RENT cases
+            #self.logger.debug('----savePropertyFile: -----> loc:%s area:%i p1:%i p2:%i rooms: %i age:%i'\
+            #    %(location,area,price[0],price[1],rooms,age))
             if price == [0,0] or rooms == 0 or area == 0:  #means data is not valid and usefull 
                 return([False , ''])
             else:
                 this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
                     price1 = price[0], price2 = price[1],rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save() 
+                self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
                 return([True , make_aware(date[1])])
 
     def get_location(self,file):
@@ -181,7 +189,7 @@ class Scrape(models.Model):
             date_str = d.get_text(strip = True)   
         except:
             date_str = 'now'
-        self.logger.debug('----def models.scrape.get_date  -----> date:%s'%(date_str))
+        #self.logger.debug('----def models.scrape.get_date  -----> date:%s'%(date_str))
         return date_str
     
     def calculate_date(self,date_str):

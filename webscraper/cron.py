@@ -23,20 +23,18 @@ class AutoCleanDB(CronJobBase):
         logger.debug("----AutoCleanDB ----->   (stage 1):")
         treshhold = datetime.now() - timedelta(days=90)
         old_files = PropertyFile.objects.filter(publishdate__lt=make_aware(treshhold))
-        if old_files.count()>50:
-            logger.debug("----AutoCleanDB ----->  (stage 1): %i files....TOOO MAAAAAAANNNNNNYYYYYYYY"%old_files.count())
-        else:
-            old_files.delete()
-            logger.debug("----AutoCleanDB ----->  (stage 1): %i files deleted."%old_files.count())
-
+        old_files.delete()
+        logger.debug("----AutoCleanDB ----->  (stage 1): %i files deleted."%old_files.count())
+        
         # stage 2: delete redundant data
         logger.debug("----AutoCleanDB ----->   (stage 2):")
         count = 0
         for row in PropertyFile.objects.all():
-            if PropertyFile.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
-                price1 = row.price1, price2 = row.price2, rooms = row.rooms, age = row.age).count() > 1:
-                logger.debug("----AutoCleanDB ----->  (stage 2): offertype:%s location:%s area:%i age:%i Deleted!!!"\
-                    %(row.offertype,row.location,row.area,row.age))
+            r= PropertyFile.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
+                price1 = row.price1, price2 = row.price2, rooms = row.rooms, age = row.age).count()
+            if r > 1:
+                logger.debug("----AutoCleanDB ----->  (stage 2):%i CONFLICTS---- offertype:%s location:%s area:%i age:%i Deleted!!!"\
+                    %(r, row.offertype,row.location,row.area,row.age))
                 row.delete()
                 count += 1
         logger.debug("----AutoCleanDB ----->  (stage 2): %i files deleted."%count)

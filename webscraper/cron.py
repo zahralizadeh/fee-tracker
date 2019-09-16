@@ -5,7 +5,8 @@ from django.utils.timezone import make_aware
 from django_cron import CronJobBase, Schedule
 
 logger = logging.getLogger(__name__)
-
+        
+                
 class AutoCleanDB(CronJobBase):
     #RUN_EVERY_MINS = 120 # every 2 hours
     #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
@@ -22,20 +23,23 @@ class AutoCleanDB(CronJobBase):
         logger.debug("----AutoCleanDB ----->   (stage 1):")
         treshhold = datetime.now() - timedelta(days=90)
         old_files = PropertyFile.objects.filter(publishdate__lt=make_aware(treshhold))
-        logger.debug("----AutoCleanDB ----->  (stage 1): %i files deleted."%old_files.count())
-        old_files.delete()
+        if old_files.count()>50:
+            logger.debug("----AutoCleanDB ----->  (stage 1): %i files....TOOO MAAAAAAANNNNNNYYYYYYYY"%old_files.count())
+        else:
+            old_files.delete()
+            logger.debug("----AutoCleanDB ----->  (stage 1): %i files deleted."%old_files.count())
 
         # stage 2: delete redundant data
         logger.debug("----AutoCleanDB ----->   (stage 2):")
         count = 0
         for row in PropertyFile.objects.all():
-            if PropertyFilel.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
+            if PropertyFile.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
                 price1 = row.price1, price2 = row.price2, rooms = row.rooms, age = row.age).count() > 1:
                 logger.debug("----AutoCleanDB ----->  (stage 2): offertype:%s location:%s area:%i age:%i Deleted!!!"\
                     %(row.offertype,row.location,row.area,row.age))
                 row.delete()
                 count += 1
-        logger.debug("----AutoCleanDB ----->  (stage 2): %i files deleted."%count())
+        logger.debug("----AutoCleanDB ----->  (stage 2): %i files deleted."%count)
 
 
 class AutoCollectData(CronJobBase):
@@ -50,7 +54,7 @@ class AutoCollectData(CronJobBase):
     def do(self):
         logger.debug("----AutoCollectData ----->  is running")
         try:    #property database is not empty
-            last_buy_property_time = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('-publishdate')[0].publishdate
+            last_buy_property_time = PropertyFile.objects.filter(offertype = 1).order_by('-publishdate')[0].publishdate
             scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_buy_property_time)
             if scrapeIhomeBuy.startscraping_update():
                 scrapeIhomeBuy.save()
@@ -59,7 +63,7 @@ class AutoCollectData(CronJobBase):
                 scrapeIhomeBuy.save() 
                 logger.debug('----AutoCollectData ----->ERROR in startscraping_update!') 
         except: 
-            if  not PropertyFile.objects.filter(offertype ='خرید-فروش'): #property database is  empty
+            if  not PropertyFile.objects.filter(offertype = 1): #property database is  empty
                 scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
                 if scrapeIhomeBuy.startscraping_update():
                     scrapeIhomeBuy.save() 
@@ -73,7 +77,7 @@ class AutoCollectData(CronJobBase):
     
         logger.debug("----AutoCollectData ----->  is running")
         try:
-            last_rent_property_time = PropertyFile.objects.filter(offertype ='رهن-اجاره').order_by('-publishdate')[0].publishdate
+            last_rent_property_time = PropertyFile.objects.filter(offertype = 2).order_by('-publishdate')[0].publishdate
             scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=last_rent_property_time)
             if scrapeIhomeRent.startscraping_update():
                 scrapeIhomeRent.save()
@@ -82,7 +86,7 @@ class AutoCollectData(CronJobBase):
                 scrapeIhomeBuy.save() 
                 logger.debug('----AutoCollectData ----->ERROR in startscraping_update!')
         except: 
-            if  not PropertyFile.objects.filter(offertype ='رهن-اجاره'): #property database is  empty
+            if  not PropertyFile.objects.filter(offertype = 2): #property database is  empty
                 scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
                 if scrapeIhomeRent.startscraping_update():
                     scrapeIhomeRent.save() 
@@ -92,5 +96,5 @@ class AutoCollectData(CronJobBase):
                     logger.debug('----AutoCollectData ----->There was no RENT files saved in DB! ERROR in startscraping_update!')
             else:
                 logger.debug('----AutoCollectData ----->There was an error in process of collecting  RENT data!')
-        logger.debug('----AutoCollectData -----> %s'%response)
+        logger.debug('----AutoCollectData -----> DONE')
     

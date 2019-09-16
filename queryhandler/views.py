@@ -20,8 +20,7 @@ def query_price(request):
     this_rooms = int(request.POST['rooms'])
     this_age = int(request.POST['age']) if 'age' in request.POST else None
     #TODO: validate user input
-    data = PropertyFile.objects.filter(offertype=this_offertype)
-    #,location__contains=this_location,area=this_area,rooms=this_rooms
+    data = PropertyFile.objects.filter(offertype=this_offertype ,location__contains=this_location,area=this_area,rooms=this_rooms)
     #if not this_age == None:
        #data = data.filter(age=this_age)
     if data.count() < 50:

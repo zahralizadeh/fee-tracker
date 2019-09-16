@@ -14,7 +14,7 @@ def collectdata(request):
     logger.debug("----def collectdata BUY ----->  is running")
     response = 'Hi..\n'
     try:    #property database is not empty
-        last_buy_property_time = PropertyFile.objects.filter(offertype ='خرید-فروش').order_by('-publishdate')[0].publishdate
+        last_buy_property_time = PropertyFile.objects.filter(offertype = 1).order_by('-publishdate')[0].publishdate
         scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_buy_property_time)
         if scrapeIhomeBuy.startscraping_update():
             scrapeIhomeBuy.save()
@@ -23,7 +23,7 @@ def collectdata(request):
             scrapeIhomeBuy.save() 
             response = response + 'ERROR in startscraping_update!'  
     except: 
-        if  not PropertyFile.objects.filter(offertype ='خرید-فروش'): #property database is  empty
+        if  not PropertyFile.objects.filter(offertype = 1): #property database is  empty
             scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
             if scrapeIhomeBuy.startscraping_update():
                 scrapeIhomeBuy.save() 
@@ -36,7 +36,7 @@ def collectdata(request):
     
     logger.debug("----def collectdata RENT ----->  is running")
     try:
-        last_rent_property_time = PropertyFile.objects.filter(offertype ='رهن-اجاره').order_by('-publishdate')[0].publishdate
+        last_rent_property_time = PropertyFile.objects.filter(offertype = 2).order_by('-publishdate')[0].publishdate
         scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=last_rent_property_time)
         if scrapeIhomeRent.startscraping_update():
             scrapeIhomeRent.save()
@@ -45,7 +45,7 @@ def collectdata(request):
             scrapeIhomeBuy.save() 
             response = response + 'ERROR in startscraping_update!'
     except: 
-        if  not PropertyFile.objects.filter(offertype ='رهن-اجاره'): #property database is  empty
+        if  not PropertyFile.objects.filter(offertype = 2): #property database is  empty
             scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
             if scrapeIhomeRent.startscraping_update():
                 scrapeIhomeRent.save() 

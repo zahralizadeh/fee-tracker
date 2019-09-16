@@ -110,7 +110,7 @@ class Scrape(models.Model):
 
         if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
             if price[0] > 0 and rooms > 0 and area > 0:
-                this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
+                this_file = PropertyFile(offertype = 1, location = location,area = area,\
                     price1 = price[0], price2 = 0,rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save()               
                 self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
@@ -122,7 +122,7 @@ class Scrape(models.Model):
             if price == [0,0] or rooms == 0 or area == 0:  #means data is not valid and usefull 
                 return([False , ''])
             else:
-                this_file = PropertyFile(offertype = self.scrapetype,location = location,area = area,\
+                this_file = PropertyFile(offertype = 2 ,location = location,area = area,\
                     price1 = price[0], price2 = price[1],rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save() 
                 self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))

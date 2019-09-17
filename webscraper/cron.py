@@ -6,7 +6,22 @@ from django_cron import CronJobBase, Schedule
 
 logger = logging.getLogger(__name__)
         
-                
+#class FixOffertype(CronJobBase):
+#    RUN_AT_TIMES = ['4:02']
+#   schedule = Schedule(run_at_times=RUN_AT_TIMES)
+    
+#    code = 'webscraper.FixOffertype'    # a unique code
+
+#    def do(self):
+#        buy = PropertyFile.objects.filter(offertype ='خرید-فروش')
+#        buy.update(offertype=1)
+#        logger.debug("----FixOffertype ----->  buy  %i"%buy.count())
+#        rent = PropertyFile.objects.filter(offertype ='رهن-اجاره')
+#        rent.update(offertype=2)
+#        logger.debug("----FixOffertype ----->  rent %i"%rent.count())
+
+
+
 class AutoCleanDB(CronJobBase):
     #RUN_EVERY_MINS = 120 # every 2 hours
     #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)

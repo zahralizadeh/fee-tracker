@@ -10,7 +10,7 @@ from django.utils.timezone import make_aware
 
 # Create your models here.
 class PropertyFile(models.Model):
-    offertype = models.CharField(max_length = 50)
+    offertype = models.IntegerField()
     location = models.CharField(max_length = 255)
     area = models.IntegerField()
     price1 = models.BigIntegerField()
@@ -23,8 +23,9 @@ class PropertyFile(models.Model):
     
 class Scrape(models.Model):
     logger = logging.getLogger(__name__)
-    startTime = models.DateTimeField(default = make_aware(datetime.now()))
-    endTime = models.DateTimeField(default = make_aware(datetime.now()))
+    startTime = models.DateTimeField()
+    endTime = models.DateTimeField()
+    last_update_time = models.DateTimeField()   # time treshhold of last update
     status = models.CharField(max_length = 20 , default= 'initialied')
     scrapetype = models.CharField(max_length = 20)  # for Rent / Sell
     site = models.CharField(max_length = 255, default = 'ihome')   #site title for scraping
@@ -33,13 +34,17 @@ class Scrape(models.Model):
     pagenumber = models.IntegerField(default=1)      #number of last web page that is checked
     pagetarget = models.IntegerField(default=1)  
     currnetrecord = models.IntegerField(default=0)   #number of records saved in database successfully
-    last_update_time = models.DateTimeField(default = make_aware(datetime.now()))   # time treshhold of last update
+    #startTime = models.DateTimeField(default = make_aware(datetime.now()))
+    #endTime = models.DateTimeField(default = make_aware(datetime.now()))
+    #last_update_time = models.DateTimeField(default = make_aware(datetime.now()))   # time treshhold of last update
+
     num_target_records = 47,496   #TODO: change the logic for end of process  #target number of records that should be saved in database  
     
-    def __str__(self):
-        return "{}-{}-{}-{}-{}".format(self.endTime,self.status,self.scrapetype,self.currnetrecord,'تهران')
+    #def __str__(self):
+    #    return "{}-{}-{}-{}-{}".format(self.endTime,self.status,self.scrapetype,self.currnetrecord,'تهران')
 
     def startscraping_update(self):    
+        self.startTime = make_aware(datetime.now())
         self.status='initialied'
         self.logger.debug("----def startscraping_update, Due Date is  ----->  %s"%(self.last_update_time))
         last_property_time = make_aware(datetime.now())

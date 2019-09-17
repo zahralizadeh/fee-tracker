@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import logging
 import requests
 from json import JSONEncoder
@@ -20,7 +22,8 @@ def query_price(request):
     this_rooms = int(request.POST['rooms'])
     this_age = int(request.POST['age']) if 'age' in request.POST else None
     #TODO: validate user input
-    data = PropertyFile.objects.filter(offertype=this_offertype ,location__contains=this_location,area=this_area,rooms=this_rooms)
+    data = PropertyFile.objects.filter(offertype=this_offertype)
+    #location__contains=this_location,,area=this_area,rooms=this_rooms)
     #if not this_age == None:
        #data = data.filter(age=this_age)
     if data.count() < 50:
@@ -50,4 +53,4 @@ def query_price(request):
     return JsonResponse({
         'number of data': '%i %i'%(len(x),len(y)),
     }, encoder=JSONEncoder)
-#curl --data "offertype=خرید_فروش&location=سعادت آباد&area=100&age=0&rooms=2" http://localhost:8009/query/price/
+#curl --data "offertype=1&location=سعادت آباد&area=100&age=0&rooms=2" http://localhost:8009/query/price/

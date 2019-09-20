@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 class AutoCleanDB(CronJobBase):
     #RUN_EVERY_MINS = 120 # every 2 hours
     #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
-
+    #TODO: extra data (more that 150 for each  location will be deleted)
     RUN_AT_TIMES = ['4:02']
     schedule = Schedule(run_at_times=RUN_AT_TIMES)
     

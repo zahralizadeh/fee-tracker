@@ -43,11 +43,15 @@ class Scrape(models.Model):
     #def __str__(self):
     #    return "{}-{}-{}-{}-{}".format(self.endTime,self.status,self.scrapetype,self.currnetrecord,'تهران')
 
-    def startscraping_update(self):    
-        self.startTime = make_aware(datetime.now())
-        self.status='initialied'
+    def startscraping_update(self):  
         self.logger.debug("----def startscraping_update, Due Date is  ----->  %s"%(self.last_update_time))
+        self.startTime = make_aware(datetime.now())
+        self.logger.debug("----def startscraping_update, self.startTime  ----->  %s"%(self.startTime))
+
+        self.status='initialied'
         last_property_time = make_aware(datetime.now())
+        self.logger.debug("----def startscraping_update, last_property_time  ----->  %s"%(last_property_time))
+
         while (self.pagenumber <= self.pagetarget) and (last_property_time >= self.last_update_time):
             #TODO: ihome sort on date is not accurate
             self.buildlink()

@@ -17,6 +17,7 @@ def collectdata(request):
     try:    #property database is not empty
         last_buy_property_time = PropertyFile.objects.filter(offertype = 1).order_by('-publishdate')[0].publishdate
         scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_buy_property_time)
+        logger.debug("----def collectdata BUY -----> scrapeIhomeBuy initialized")
         if scrapeIhomeBuy.startscraping_update():
             scrapeIhomeBuy.save()
             response = response +'I saved information about offertype = Buy in database!' 
@@ -39,6 +40,8 @@ def collectdata(request):
     try:
         last_rent_property_time = PropertyFile.objects.filter(offertype = 2).order_by('-publishdate')[0].publishdate
         scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=last_rent_property_time)
+        logger.debug("----def collectdata RENT -----> scrapeIhomeRent initialized")
+
         if scrapeIhomeRent.startscraping_update():
             scrapeIhomeRent.save()
             response = response +'\n I saved information about offertype = Rent in database!'

@@ -45,6 +45,7 @@ class Scrape(models.Model):
 
     def startscraping_update(self):  
         self.logger.debug("----def startscraping_update, Due Date is  ----->  %s"%(self.last_update_time))
+        
         self.startTime = make_aware(datetime.now())
         self.logger.debug("----def startscraping_update, self.startTime  ----->  %s"%(self.startTime))
 

@@ -4,16 +4,13 @@ certifi==2019.6.16
 chardet==3.0.4
 Cython==0.29.6
 DateTime==4.3
-dbus-python==1.2.8
 Django==2.2.5
 django-common-helpers==0.9.2
 django-cron==0.5.1
-gpg==1.9.0
 idna==2.8
 joblib==0.13.2
 numpy==1.16.2
 pycairo==1.18.1
-pygobject==3.26.1
 pytz==2019.2
 requests==2.22.0
 scikit-learn==0.21.3

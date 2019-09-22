@@ -25,16 +25,42 @@ def query_price(request):
     this_age = int(request.GET['age']) 
     #TODO: validate user input
 
-    data = PropertyFile.objects.filter(offertype=this_offertype,location__contains=this_location).order_by('-publishdate')
     #TODO: filter data with other criterea due to data.count()
     #TODO: prediction model. save result of prediction
     #TODO: search prediction history before start prediction
     #TODO: token provided or something to prevent robots
+    data = PropertyFile.objects.filter(\
+        offertype=this_offertype,\
+        location__contains=this_location,\
+        area__range=(this_area-10,this_area+10),\
+        rooms=this_rooms,\
+        age__range=(this_age-3 if this_age>3 else 0,this_age+3)).order_by('-publishdate')
 
+    filtering = 'offertype location area rooms age'
     if data.count()< 50:
-        return JsonResponse({
-            'message': 'There is not enogh data for this location',
-        }, encoder=JSONEncoder)        
+        data = PropertyFile.objects.filter(\
+            offertype=this_offertype,\
+            location__contains=this_location,\
+            rooms=this_rooms,\
+            age__range=(this_age-3 if this_age>3 else 0,this_age+3)).order_by('-publishdate')
+        filtering = 'offertype location rooms age'
+
+        if data.count()< 50:
+            data = PropertyFile.objects.filter(\
+                offertype=this_offertype,\
+                location__contains=this_location,\
+                rooms=this_rooms).order_by('-publishdate')
+            filtering = 'offertype location rooms'
+
+            if data.count()< 50:
+                data = PropertyFile.objects.filter(\
+                    offertype=this_offertype,\
+                    location__contains=this_location).order_by('-publishdate')
+                filtering = 'offertype location'
+                if data.count()< 50:
+                    return JsonResponse({
+                        'message': 'There is not enogh data for this location',
+                        }, encoder=JSONEncoder)
 
     count = data.count() if data.count()<150 else 150  # max 150 recordes are needed for prediction
     x = []
@@ -51,13 +77,21 @@ def query_price(request):
     clf = tree.DecisionTreeClassifier()
     clf = clf.fit(x,y)
     answer = clf.predict([[this_area,this_rooms,this_age]])
+    first_data = ' %s'%data[0].publishdate
+    last_data = ' %s'%data[count-1].publishdate
     if this_offertype == '1':
         return JsonResponse({
-            'count' : '%i'%data.count(),
+            'firstdata': '%s'%first_data,
+            'lastdata': '%s'%last_data,
+            'filter' : filtering,
+            'count' : '%i'%count,
             'answer': 'I predict its cost as %i tomans'%answer[0],
             }, encoder=JSONEncoder)
     else:
         return JsonResponse({
+            'firstdata': '%s'%first_data,
+            'lastdata': '%s'%last_data,
+            'filter' : filtering,
             'count' : '%i'%data.count(),
             'answer': 'I predict its cost as %i tomans for deposit and %i tomans as monthly rent'%(answer[0][1],answer[0][0]),
             }, encoder=JSONEncoder)

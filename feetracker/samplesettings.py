@@ -179,5 +179,9 @@ LOGGING = {
             'handlers': ['console', 'filelogger'],
             'level': 'DEBUG',
         },
+        'queryhandler': {
+            'handlers': ['console', 'filelogger'],
+            'level': 'DEBUG',
+        },
     },
 }

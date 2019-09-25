@@ -19,17 +19,19 @@ class PropertyPredictResponse(models.Model):
     area = models.IntegerField()                    # From user
     rooms = models.IntegerField()                   # From user
     age = models.IntegerField()                     # From user
-    price1 = models.BigIntegerField()               # Prediction result
-    price2 = models.BigIntegerField()               # Prediction result
+    price1 = models.BigIntegerField(null = True, blank = True)               # Prediction result
+    price2 = models.BigIntegerField(null = True, blank = True)               # Prediction result
     responseDate = models.DateTimeField()           # Date of request
-    firstdata = models.DateTimeField()              # PublishDate of first property in database
-    lastdata = models.DateTimeField()               # PublishDate of last property in database
+    firstdata = models.DateTimeField(null = True, blank = True)              # PublishDate of first property in database
+    lastdata = models.DateTimeField(null = True, blank = True)               # PublishDate of last property in database
     filtering = models.CharField(max_length=50)     # Criterias which filter is applied to
     recordcount = models.IntegerField()             # Number of filtered recorded
+    isithot = models.IntegerField(default=0)
+    
 
     def predict (self):
-    #TODO: token provided or something to prevent robots
-    #TODO: prediction model. save result of prediction
+        #TODO: token provided or something to prevent robots
+        #TODO: prediction model. save result of prediction
         self.responseDate = timezone.make_aware(datetime.now())
         data = PropertyFile.objects.filter(\
             offertype=self.offertype,\
@@ -61,10 +63,8 @@ class PropertyPredictResponse(models.Model):
                     self.filtering = 'offertype location'
                     if data.count()< 50:
                         self.filtering = 'not enough data'
-                        #TODO: recheck
-                        return JsonResponse({
-                            'message': 'There is not enogh data for this location',
-                            }, encoder=JSONEncoder)
+                        self.recordcount = data.count()
+                        return self.send_response()
 
         self.recordcount = data.count() if data.count()<150 else 150  # max 150 recordes are needed for prediction
         x = []
@@ -87,7 +87,29 @@ class PropertyPredictResponse(models.Model):
         if self.offertype == '1':
             self.price1 = answer[0]
             self.price2 = 0
+        else:
+            self.price1 = answer[0][1]
+            self.price2 = answer[0][0]
+        
+        return self.send_response()
+
+    
+    def save(self, *args,**kwargs):
+        self.full_clean()
+        super(PropertyPredictResponse, self).save(*args, **kwargs)
+
+    def hotPlus (self):
+        self.isithot +=1
+    
+    def send_response (self):
+        if self.price1 in (0,None):
             return JsonResponse({
+                'status': 'Fail',
+                'message': 'There is not enough data for this location',
+                }, encoder=JSONEncoder)
+        if self.offertype == '1':
+            return JsonResponse({
+                'status': 'ok',
                 'firstdata': ' %s'%self.firstdata,
                 'lastdata': ' %s'%self.lastdata,
                 'filter' : self.filtering,
@@ -95,17 +117,11 @@ class PropertyPredictResponse(models.Model):
                 'answer': 'I predict its cost as %i tomans'%self.price1,
                 }, encoder=JSONEncoder)
         else:
-            self.price1 = answer[0][1]
-            self.price2 = answer[0][0]
             return JsonResponse({
+                'status': 'ok',
                 'firstdata': ' %s'%self.firstdata,
                 'lastdata': ' %s'%self.lastdata,
                 'filter' : self.filtering,
                 'count' : '%i'%self.recordcount,
-                'answer': 'I predict its cost as %i tomans for deposit and %i tomans as monthly rent'%(answer[0][1],answer[0][0]),
+                'answer': 'I predict its cost as %i tomans for deposit and %i tomans as monthly rent'%(self.price1,self.price2),
                 }, encoder=JSONEncoder)
-        logger.debug('New response saved in database in %s'%self.responseDate)
-    
-    def save(self, *args,**kwargs):
-        self.full_clean()
-        super(PropertyPredictResponse, self).save(*args, **kwargs)

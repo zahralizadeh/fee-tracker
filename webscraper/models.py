@@ -34,14 +34,7 @@ class Scrape(models.Model):
     pagenumber = models.IntegerField(default=1)      #number of last web page that is checked
     pagetarget = models.IntegerField(default=1)  
     currnetrecord = models.IntegerField(default=0)   #number of records saved in database successfully
-    #startTime = models.DateTimeField(default = make_aware(datetime.now()))
-    #endTime = models.DateTimeField(default = make_aware(datetime.now()))
-    #last_update_time = models.DateTimeField(default = make_aware(datetime.now()))   # time treshhold of last update
-
-    num_target_records = 47,496   #TODO: change the logic for end of process  #target number of records that should be saved in database  
-    
-    #def __str__(self):
-    #    return "{}-{}-{}-{}-{}".format(self.endTime,self.status,self.scrapetype,self.currnetrecord,'تهران')
+    num_target_records = 47,496   
 
     def startscraping_update(self):  
         self.logger.debug("----def startscraping_update, Due Date is  ----->  %s"%(self.last_update_time))
@@ -184,12 +177,13 @@ class Scrape(models.Model):
             return int(rooms_str)
         except:
             return 0
-        
+
     def get_building_age(self,file):
         try:
             age_str =  file.find('i',class_ = 'ihome-building-age').next_sibling.replace('سن بنا','').strip()
             return int(age_str.replace(',',''))
         except:
+            #TODO: most data returns 0! seprate new(0) and error91000) !   
             return 0
 
     def get_date(self,file):

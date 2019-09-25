@@ -33,6 +33,7 @@
 - [x] check data and collect data since last update automatically
 - [x] if database is clean first data collecting will run
 - [x] delete old files from database
+- [ ] save price/meter instead of price, check if the result is more consisitent or not
 
 
 

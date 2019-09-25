@@ -14,6 +14,21 @@ POST, returns a json
 input:  username(username/email), password
 output: status--->(ok/Fail), 
         message-->(You successfully logged in. / Invalid username or password!)
-        token---->token(optional)     
+        token---->token(optional)  
+
+# /query/price
+GET, returns a json
+input:  location, area, rooms, offertype, age
+output: status---->(ok/Fail/400 Bad Request), 
+        message--->(You successfully logged in. / Invalid username or password!)(status=Fail)
+        firstdata-> PropertyPredictResponse.firstdata(status=ok)
+        lastdata--> PropertyPredictResponse.lastdata(status=ok)
+        filter----> PropertyPredictResponse.filtering(status=ok)
+        count-----> PropertyPredictResponse.recordcount(status=ok)
+        answer----> PropertyPredictResponse.price1 , PropertyPredictResponse.price2(optional) (status=ok)
+        
+# /query/area
+
+# /query/locationlist
 
 

@@ -34,7 +34,9 @@ class AutoCleanDB(CronJobBase):
 
     def do(self):
         logger.debug("----AutoCleanDB ----->  is running")
-
+        #old_files = PropertyFile.objects.filter(offertype=1)
+        #old_files.delete()
+        
         # stage 1: delete old data
         logger.debug("----AutoCleanDB ----->   (stage 1):")
         treshhold = datetime.now() - timedelta(days=90)

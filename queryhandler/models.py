@@ -77,15 +77,15 @@ class PropertyPredictResponse(models.Model):
             for j in range(0, self.recordcount):
                 x.append([data[j].area, data[j].rooms,data[j].age])
                 y.append([data[j].price1,data[j].price2])
-        clf = tree.DecisionTreeClassifier()
+        clf = tree.DecisionTreeClassifier(criterion='entropy',max_depth =4, random_state=1)
         clf = clf.fit(x,y)
         answer = clf.predict([[self.area,self.rooms,self.age]])
         
         self.firstdata = data[0].publishdate
         self.lastdata = data[self.recordcount-1].publishdate
         
-        if self.offertype == '1':
-            self.price1 = answer[0]
+        if self.offertype in (1, '1'):
+            self.price1 = answer[0] * self.area
             self.price2 = 0
         else:
             self.price1 = answer[0][1]
@@ -107,7 +107,7 @@ class PropertyPredictResponse(models.Model):
                 'status': 'Fail',
                 'message': 'There is not enough data for this location',
                 }, encoder=JSONEncoder)
-        if self.offertype == '1':
+        if self.offertype in (1, '1'):
             return JsonResponse({
                 'status': 'ok',
                 'firstdata': ' %s'%self.firstdata,

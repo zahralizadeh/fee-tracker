@@ -17,7 +17,7 @@
 # web scrape
 - [ ] webscrape model documentation
 - [ ] fix bug: scrape age (new/none) is not detected
-- [ ] search prediction history before start prediction
+- [x] search prediction history before start prediction
 - [ ] fix warning of ssl sneding rquest to ihome
 
 # Server Side

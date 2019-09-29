@@ -34,7 +34,7 @@ class AutoCleanDB(CronJobBase):
 
     def do(self):
         logger.debug("----AutoCleanDB ----->  is running")
-        #old_files = PropertyFile.objects.filter(offertype=1)
+        #old_files = PropertyFile.objects.all()
         #old_files.delete()
         
         # stage 1: delete old data

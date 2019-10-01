@@ -13,8 +13,7 @@ class PropertyFile(models.Model):
     offertype = models.IntegerField()
     location = models.CharField(max_length = 255)
     area = models.IntegerField()
-    price1 = models.BigIntegerField()
-    price2 = models.BigIntegerField()
+    price = models.BigIntegerField()
     rooms = models.IntegerField()
     age = models.IntegerField()
     publishdate = models.DateTimeField()
@@ -113,30 +112,23 @@ class Scrape(models.Model):
         if area < 30:
             self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD AREA')
             return([False , ''])
-
-        if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
-            if price[0] > 0 and rooms > 0 and area > 0:
-                pm = price[0] / area
-                this_file = PropertyFile(offertype = 1, location = location,area = area,\
-                    price1 = pm , price2 = 0,rooms = rooms,age = age, publishdate = make_aware(date[1]))
-                this_file.save()               
-                self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
-                return([True , make_aware(date[1])])
+        
+        if price == [0,0] or rooms == 0:
+            self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD ROOM or PRICE')
             return([False , ''])
+        
+        if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
+            pm = price[0] / area
         elif self.scrapetype == 'رهن-اجاره': #save data in database for RENT cases
-            #self.logger.debug('----savePropertyFile: -----> loc:%s area:%i p1:%i p2:%i rooms: %i age:%i'\
-            #    %(location,area,price[0],price[1],rooms,age))
-            if price == [0,0] or rooms == 0 or area == 0:  #means data is not valid and usefull 
-                return([False , ''])
-            else:
-                total_price = price[1]+int((price[0]*100)/3)
-                pm = total_price / area
-                a = "%s - deposit:%i- rent:%i"%(location,price[1],price[0])
-                this_file = PropertyFile(offertype = 2 ,location = a,area = area,\
-                    price1 = pm, price2 = 0 ,rooms = rooms,age = age, publishdate = make_aware(date[1]))
-                this_file.save() 
-                self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
-                return([True , make_aware(date[1])])
+            total_price = price[1]+int((price[0]*100)/3)
+            pm = total_price / area
+            location = "%s - deposit:%i- rent:%i"%(location,price[1],price[0])
+
+        this_file = PropertyFile(offertype = 1, location = location,area = area,\
+                    price = pm, rooms = rooms,age = age, publishdate = make_aware(date[1]))
+        this_file.save()
+        self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
+        return([True , make_aware(date[1])])
 
     def get_location(self,file):
         return file.find('div',class_='location').span.extract().get_text(strip=True)

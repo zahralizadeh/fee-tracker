@@ -19,8 +19,7 @@ class PropertyPredictResponse(models.Model):
     area = models.IntegerField()                    # From user
     rooms = models.IntegerField()                   # From user
     age = models.IntegerField()                     # From user
-    price1 = models.BigIntegerField(null = True, blank = True)               # Prediction result
-    price2 = models.BigIntegerField(null = True, blank = True)               # Prediction result
+    price = models.BigIntegerField(null = True, blank = True)               # Prediction result
     responseDate = models.DateTimeField()           # Date of request
     firstdata = models.DateTimeField(null = True, blank = True)              # PublishDate of first property in database
     lastdata = models.DateTimeField(null = True, blank = True)               # PublishDate of last property in database
@@ -69,14 +68,19 @@ class PropertyPredictResponse(models.Model):
         self.recordcount = data.count() if data.count()<150 else 150  # max 150 recordes are needed for prediction
         x = []
         y = []
-        if self.offertype == '1':   # load input and output lists for prediction with last 150 record in database( MAX)
-            for j in range(0, self.recordcount):
+        # load input and output lists for prediction with last 150 record in database( MAX)
+        for j in range(0, self.recordcount):
                 x.append([data[j].area, data[j].rooms,data[j].age])
-                y.append(data[j].price1)
-        elif self.offertype == '2':
-            for j in range(0, self.recordcount):
-                x.append([data[j].area, data[j].rooms,data[j].age])
-                y.append([data[j].price1,data[j].price2])
+                y.append(data[j].price)
+
+       # if self.offertype == '1':   
+        #    for j in range(0, self.recordcount):
+         #       x.append([data[j].area, data[j].rooms,data[j].age])
+          #      y.append(data[j].price1)
+        #elif self.offertype == '2':
+         #   for j in range(0, self.recordcount):
+          #      x.append([data[j].area, data[j].rooms,data[j].age])
+           #     y.append([data[j].price1,data[j].price2])
         clf = tree.DecisionTreeClassifier(criterion='entropy',max_depth =4, random_state=1)
         clf = clf.fit(x,y)
         answer = clf.predict([[self.area,self.rooms,self.age]])
@@ -84,12 +88,13 @@ class PropertyPredictResponse(models.Model):
         self.firstdata = data[0].publishdate
         self.lastdata = data[self.recordcount-1].publishdate
         
-        if self.offertype in (1, '1'):
-            self.price1 = answer[0] * self.area
-            self.price2 = 0
-        else:
-            self.price1 = answer[0][1]
-            self.price2 = answer[0][0]
+        self.price = answer[0] 
+        #if self.offertype in (1, '1'):
+          #  self.price = answer[0] * self.area
+           # self.price2 = 0
+        #else:
+         #   self.price1 = answer[0][1]
+            #self.price2 = answer[0][0]
         
         return self.send_response()
 
@@ -102,7 +107,7 @@ class PropertyPredictResponse(models.Model):
         self.isithot +=1
     
     def send_response (self):
-        if self.price1 in (0,None):
+        if self.price in (0,None):
             return JsonResponse({
                 'status': 'Fail',
                 'message': 'There is not enough data for this location',
@@ -114,7 +119,7 @@ class PropertyPredictResponse(models.Model):
                 'lastdata': ' %s'%self.lastdata,
                 'filter' : self.filtering,
                 'count' : '%i'%self.recordcount,
-                'answer': 'I predict its cost as %i tomans'%self.price1,
+                'answer': 'I predict its cost as %i tomans'%(self.price * self.area),
                 }, encoder=JSONEncoder)
         else:
             return JsonResponse({
@@ -123,5 +128,5 @@ class PropertyPredictResponse(models.Model):
                 'lastdata': ' %s'%self.lastdata,
                 'filter' : self.filtering,
                 'count' : '%i'%self.recordcount,
-                'answer': 'I predict its cost as %i tomans for deposit and %i tomans as monthly rent'%(self.price1,self.price2),
+                'answer': 'I predict its cost as %i tomans for full deposit'%(self.price * self.area),
                 }, encoder=JSONEncoder)

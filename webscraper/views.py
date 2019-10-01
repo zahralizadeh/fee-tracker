@@ -12,7 +12,10 @@ logger = logging.getLogger(__name__)
 
 # Create your views here.
 def collectdata(request):
-    this_offertype = request.GET['offertype']
+    try:
+        this_offertype = request.GET['offertype']
+    except:
+        logger.debug("----def collectdata ----->  Collecting both BUY and RENT Files!")
     response = 'Hi..\n'
 
     if this_offertype in (2,'2'):

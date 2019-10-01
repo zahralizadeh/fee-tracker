@@ -129,10 +129,11 @@ class Scrape(models.Model):
             if price == [0,0] or rooms == 0 or area == 0:  #means data is not valid and usefull 
                 return([False , ''])
             else:
-                total_price = price[0]+int(price[1]*100/3)
+                total_price = price[1]+int((price[0]*100)/3)
                 pm = total_price / area
-                this_file = PropertyFile(offertype = 2 ,location = location,area = area,\
-                    price1 = pm, price2 = 0,rooms = rooms,age = age, publishdate = make_aware(date[1]))
+                a = "%s - deposit:%i- rent:%i"%(location,price[1],price[0])
+                this_file = PropertyFile(offertype = 2 ,location = a,area = area,\
+                    price1 = pm, price2 = 0 ,rooms = rooms,age = age, publishdate = make_aware(date[1]))
                 this_file.save() 
                 self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
                 return([True , make_aware(date[1])])

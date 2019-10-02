@@ -15,6 +15,7 @@ def collectdata(request):
     try:
         this_offertype = request.GET['offertype']
     except:
+        this_offertype = 'all'
         logger.debug("----def collectdata ----->  Collecting both BUY and RENT Files!")
     response = 'Hi..\n'
 

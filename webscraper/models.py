@@ -106,6 +106,7 @@ class Scrape(models.Model):
             self.status = 'error in get Target Page Number'                
         
     def savePropertyFile (self,location,area,price,rooms,age,date):
+        # verifiying data
         if date[0]==False:
             self.logger.debug('----def models.scrape.savePropertyFile: -----> verify date:FALSE')
             return([False , ''])
@@ -113,18 +114,26 @@ class Scrape(models.Model):
             self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD AREA')
             return([False , ''])
         
-        if price == [0,0] or rooms == 0:
-            self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD ROOM or PRICE')
+        if price == [0,0]  or price ==[0]:
+            self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD PRICE')
+            return([False , ''])
+
+        if rooms == 0:
+            self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD ROOM ')
             return([False , ''])
         
-        if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
+        # set the specific variables for whether buy or rent cases
+        if self.scrapetype == 'خرید-فروش':   # it is a BUY cases
             pm = price[0] / area
-        elif self.scrapetype == 'رهن-اجاره': #save data in database for RENT cases
+            offertype = 1
+        elif self.scrapetype == 'رهن-اجاره': # it is a RENT cases
             total_price = price[1]+int((price[0]*100)/3)
             pm = total_price / area
-            location = "%s - deposit:%i- rent:%i"%(location,price[1],price[0])
-
-        this_file = PropertyFile(offertype = 1, location = location,area = area,\
+            offertype = 2
+            location = "%s - deposit:%i - rent:%i"%(location,price[1],price[0])
+        
+        # save data in database
+        this_file = PropertyFile(offertype = offertype, location = location,area = area,\
                     price = pm, rooms = rooms,age = age, publishdate = make_aware(date[1]))
         this_file.save()
         self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))

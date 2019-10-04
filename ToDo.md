@@ -17,7 +17,7 @@
 # web scrape
 - [ ] webscrape model documentation
 - [ ] fix bug: scrape age (new/none) is not detected
-- [ ] search prediction history before start prediction
+- [x] search prediction history before start prediction
 - [ ] fix warning of ssl sneding rquest to ihome
 
 # Server Side
@@ -34,6 +34,7 @@
 - [x] if database is clean first data collecting will run
 - [x] delete old files from database
 - [ ] save price/meter instead of price, check if the result is more consisitent or not
+- [ ] save property type! it was ignored!!!!
 
 
 

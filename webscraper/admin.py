@@ -3,7 +3,7 @@ from .models import PropertyFile, Scrape
 
 # Register your models here.
 class PropertyFileAdmin (admin.ModelAdmin):
-    list_display = ['offertype', 'location', 'area', 'price1', 'price2', 'rooms', 'age', 'publishdate' ]
+    list_display = ['offertype', 'location', 'area', 'price', 'rooms', 'age', 'publishdate' ]
     search_fields = ('offertype', 'location' )
 
 class ScrapeAdmin (admin.ModelAdmin):

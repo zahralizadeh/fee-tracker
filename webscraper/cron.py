@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 #        logger.debug("----FixOffertype ----->  rent %i"%rent.count())
 
 
-
 class AutoCleanDB(CronJobBase):
     #RUN_EVERY_MINS = 120 # every 2 hours
     #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
@@ -34,7 +33,9 @@ class AutoCleanDB(CronJobBase):
 
     def do(self):
         logger.debug("----AutoCleanDB ----->  is running")
-
+        #old_files = PropertyFile.objects.all()
+        #old_files.delete()
+        
         # stage 1: delete old data
         logger.debug("----AutoCleanDB ----->   (stage 1):")
         treshhold = datetime.now() - timedelta(days=90)

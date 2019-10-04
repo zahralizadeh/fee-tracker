@@ -10,6 +10,16 @@ from django.utils.timezone import make_aware
 
 # Create your models here.
 class PropertyFile(models.Model):
+    PROPERTY_TYPE = [
+        ('RES' , 'مسکونی'),
+        ('COM' , 'اداری-تجاری'),
+        ('IND' , 'صنعتی'),
+    ]
+    propertytype = models.CharField(
+        max_length= 3,
+        choices= PROPERTY_TYPE,
+        default='RES',
+    )
     offertype = models.IntegerField()
     location = models.CharField(max_length = 255)
     area = models.IntegerField()
@@ -17,15 +27,26 @@ class PropertyFile(models.Model):
     rooms = models.IntegerField()
     age = models.IntegerField()
     publishdate = models.DateTimeField()
+    
     def __str__(self):
         return "{}-{}-{} متری".format(self.offertype, self.location,self.area)
     
 class Scrape(models.Model):
+    PROPERTY_TYPE = [
+        ('RES' , 'مسکونی'),
+        ('COM' , 'اداری-تجاری'),
+        ('IND' , 'صنعتی'),
+    ]
+    propertytype = models.CharField(
+        max_length= 3,
+        choices= PROPERTY_TYPE,
+        default='RES',
+    )
     logger = logging.getLogger(__name__)
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
     last_update_time = models.DateTimeField()   # time treshhold of last update
-    status = models.CharField(max_length = 20 , default= 'initialied')
+    status = models.CharField(max_length = 20 , default= 'initialied') #TODO: convert to choice
     scrapetype = models.CharField(max_length = 20)  # for Rent / Sell
     site = models.CharField(max_length = 255, default = 'ihome')   #site title for scraping
     baselink = models.CharField(max_length = 255)
@@ -82,7 +103,7 @@ class Scrape(models.Model):
             return False
 
     def buildlink(self):
-        self.baselink = 'https://www.%s.ir/%s/املاک/تهران'%(self.site,self.scrapetype)
+        self.baselink = 'https://www.%s.ir/%s/%s/تهران'%(self.site,self.scrapetype,self.get_propertytype_display())
         if self.site == 'ihome':
             sort_statement  = '?&sort=date_desc'
         if self.pagenumber > 1:
@@ -134,7 +155,7 @@ class Scrape(models.Model):
         
         # save data in database
         this_file = PropertyFile(offertype = offertype, location = location,area = area,\
-                    price = pm, rooms = rooms,age = age, publishdate = make_aware(date[1]))
+                    price = pm, rooms = rooms,age = age, publishdate = make_aware(date[1]), propertytype = self.propertytype)
         this_file.save()
         self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
         return([True , make_aware(date[1])])

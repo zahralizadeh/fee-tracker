@@ -48,7 +48,7 @@ class AutoCleanDB(CronJobBase):
         count = 0
         for row in PropertyFile.objects.all():
             r= PropertyFile.objects.filter(offertype = row.offertype,location = row.location,area = row.area,\
-                price1 = row.price1, price2 = row.price2, rooms = row.rooms, age = row.age).count()
+                price1 = row.price1, price2 = row.price2, rooms = row.rooms, age = row.age, propertytype = row.propertytype).count()
             if r > 1:
                 logger.debug("----AutoCleanDB ----->  (stage 2):%i CONFLICTS---- offertype:%s location:%s area:%i age:%i Deleted!!!"\
                     %(r, row.offertype,row.location,row.area,row.age))

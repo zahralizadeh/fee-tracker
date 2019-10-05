@@ -7,6 +7,7 @@ from datetime import datetime
 from webscraper.models import PropertyFile
 from django.http import JsonResponse
 from django.utils import timezone
+from sklearn.model_selection import GridSearchCV
 
 
  
@@ -83,14 +84,26 @@ class PropertyPredictResponse(models.Model):
         x = []
         y = []
         # load input and output lists for prediction with last 150 record in database( MAX)
+        #for j in range(0, self.recordcount):
+        #        x.append([data[j].area, data[j].rooms,data[j].age])
+        #        y.append(data[j].price)
+
+        #clf = tree.DecisionTreeClassifier(criterion='entropy',max_depth =4, random_state=1)
+        #clf = clf.fit(x,y)
+        #answer = clf.predict([[self.area,self.rooms,self.age]])
+        
+        # load input and output lists for prediction with last 150 record in database( MAX)
         for j in range(0, self.recordcount):
                 x.append([data[j].area, data[j].rooms,data[j].age])
                 y.append(data[j].price)
 
-        clf = tree.DecisionTreeClassifier(criterion='entropy',max_depth =4, random_state=1)
-        clf = clf.fit(x,y)
-        answer = clf.predict([[self.area,self.rooms,self.age]])
-        
+        model = tree.DecisionTreeRegressor()
+        criterion = ['mse' , 'friedman_mse', 'mse']
+        max_depth = [1,3,5,None]
+        splitter = ['best' , 'random']
+        grid = GridSearchCV(estimator = model, cv=3 ,\
+            param_grid = dict(criterion = criterion,max_depth =max_depth,splitter = splitter))
+        answer = grid.fit(x,y).predict([[self.area,self.rooms,self.age]])
         self.firstdata = data[0].publishdate
         self.lastdata = data[self.recordcount-1].publishdate       
         self.price = answer[0]        

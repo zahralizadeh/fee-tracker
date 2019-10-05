@@ -70,48 +70,59 @@ class AutoCollectData(CronJobBase):
 
     def do(self):
         logger.debug("----AutoCollectData ----->  is running")
-        try:    #property database is not empty
-            last_buy_property_time = PropertyFile.objects.filter(offertype = 1).order_by('-publishdate')[0].publishdate
-            scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=last_buy_property_time)
-            if scrapeIhomeBuy.startscraping_update():
-                scrapeIhomeBuy.save()
-                logger.debug('----AutoCollectData ----->I saved information about offertype = Buy in database!')
-            else: 
-                scrapeIhomeBuy.save() 
-                logger.debug('----AutoCollectData ----->ERROR in startscraping_update!') 
-        except: 
-            if  not PropertyFile.objects.filter(offertype = 1): #property database is  empty
-                scrapeIhomeBuy = Scrape(scrapetype= 'خرید-فروش',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
-                if scrapeIhomeBuy.startscraping_update():
-                    scrapeIhomeBuy.save() 
-                    logger.debug('----AutoCollectData ----->There was no BUY files saved in DB! Data published in the\
-                         last month was scraped successfully!')
-                else:
-                    scrapeIhomeBuy.save()
-                    logger.debug('----AutoCollectData -----> There was no BUY files saved in DB! ERROR in startscraping_update!')
-            else:
-                logger.debug('----AutoCollectData ----->There was an error in process of collecting  BUY data!')
-    
-        logger.debug("----AutoCollectData ----->  is running")
-        try:
-            last_rent_property_time = PropertyFile.objects.filter(offertype = 2).order_by('-publishdate')[0].publishdate
-            scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=last_rent_property_time)
-            if scrapeIhomeRent.startscraping_update():
-                scrapeIhomeRent.save()
-                logger.debug('----AutoCollectData ----->I saved information about offertype = Rent in database!')
-            else: 
-                scrapeIhomeBuy.save() 
-                logger.debug('----AutoCollectData ----->ERROR in startscraping_update!')
-        except: 
-            if  not PropertyFile.objects.filter(offertype = 2): #property database is  empty
-                scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
-                if scrapeIhomeRent.startscraping_update():
-                    scrapeIhomeRent.save() 
-                    logger.debug('----AutoCollectData ----->There was no RENT files saved in DB! Data published in the last month was scraped successfully!')
-                else: 
-                    scrapeIhomeBuy.save() 
-                    logger.debug('----AutoCollectData ----->There was no RENT files saved in DB! ERROR in startscraping_update!')
-            else:
-                logger.debug('----AutoCollectData ----->There was an error in process of collecting  RENT data!')
-        logger.debug('----AutoCollectData -----> DONE')
+        this_propertytype = ['RES','COM','IND']
+        this_offertype = [ (1,'خرید-فروش','BUY'),(2,'رهن-اجاره','RENT')]
+        
+        for i in this_offertype:
+            for j in this_propertytype:
+                logger.debug("----AutoCollectData -----> scraping for %s in %s  is running"%(i[2],j))
+                try:    #property database is not empty
+                    last_buy_property_time = PropertyFile.objects.filter(offertype = i[0],propertytype = j)\
+                        .order_by('-publishdate')[0].publishdate
+                    scrapeIhomeBuy = Scrape(scrapetype= i[1],last_update_time=last_buy_property_time,propertytype=j)
+                    if scrapeIhomeBuy.startscraping_update():
+                        scrapeIhomeBuy.save()
+                        logger.debug('----AutoCollectData ----->I saved information about %s in %s in database!'%(i[2],j))
+                    else: 
+                        scrapeIhomeBuy.save() 
+                        logger.debug('----AutoCollectData ----->%s in %s -- ERROR in startscraping_update!'%(i[2],j)) 
+                except: 
+                    if  not PropertyFile.objects.filter(offertype = i[0],propertytype = j): #property database is  empty
+                        scrapeIhomeBuy = Scrape(scrapetype= i[1] ,propertytype = j,\
+                            last_update_time=make_aware(datetime.now() - timedelta(days=60)))
+                        if scrapeIhomeBuy.startscraping_update():
+                            scrapeIhomeBuy.save() 
+                            logger.debug('----AutoCollectData ----->There was no %s in %s files saved in DB!\
+                                Data published in the last month was scraped successfully!'%(i[2],j))
+                        else:
+                            scrapeIhomeBuy.save()
+                            logger.debug('----AutoCollectData -----> There was no %s in %s files saved in DB!\
+                                 ERROR in startscraping_update!'%(i[2],j))
+                    else:
+                        logger.debug('----AutoCollectData ----->There was an error in process of collecting  %s in %s data!'%(i[2],j))
+            
+        logger.debug('----AutoCollectData -----> DONE')    
+        
+             #  logger.debug("----AutoCollectData ----->  is running")
+          #  try:
+            #    last_rent_property_time = PropertyFile.objects.filter(offertype = 2).order_by('-publishdate')[0].publishdate
+            #    scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=last_rent_property_time)
+            #    if scrapeIhomeRent.startscraping_update():
+            #        scrapeIhomeRent.save()
+             #       logger.debug('----AutoCollectData ----->I saved information about offertype = Rent in database!')
+              #  else: 
+               #     scrapeIhomeBuy.save() 
+                #    logger.debug('----AutoCollectData ----->ERROR in startscraping_update!')
+            #except: 
+             #   if  not PropertyFile.objects.filter(offertype = 2): #property database is  empty
+              #      scrapeIhomeRent = Scrape(scrapetype= 'رهن-اجاره',last_update_time=make_aware(datetime.now() - timedelta(days=60)))
+               #     if scrapeIhomeRent.startscraping_update():
+                #        scrapeIhomeRent.save() 
+                 #       logger.debug('----AutoCollectData ----->There was no RENT files saved in DB! Data published in the last month was scraped successfully!')
+                  #  else: 
+                   #     scrapeIhomeBuy.save() 
+                    #    logger.debug('----AutoCollectData ----->There was no RENT files saved in DB! ERROR in startscraping_update!')
+            #    else:
+             #       logger.debug('----AutoCollectData ----->There was an error in process of collecting  RENT data!')
+           
     

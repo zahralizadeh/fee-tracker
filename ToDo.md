@@ -15,14 +15,22 @@
 - [ ] pridict more consistently - hidden BUG
 
 # web scrape
-- [ ] webscrape model documentation
+- [x] webscrape model documentation
 - [ ] fix bug: scrape age (new/none) is not detected
 - [x] search prediction history before start prediction
-- [ ] fix warning of ssl sneding rquest to ihome
+- [ ] fix warning of ssl sneding request to ihome
+
+# clean database
+- [ ] in cleaning database consider that for each location there should be at least 50 records left
+- [ ] extra data (more that 150 for each  location will be deleted)
+- [ ] if last update was not successfull try again some minutes later
+
+# poll
+- [ ] ask user if prediction was accurate or not (receive and store poll)
 
 # Server Side
 - [ ] https://stackoverflow.com/questions/46385350/django-cron-task-not-executing-automatically
-- [ ] how to aupload website on server
+- [ ] how to upload website on server
 
 
 # logic
@@ -33,8 +41,8 @@
 - [x] check data and collect data since last update automatically
 - [x] if database is clean first data collecting will run
 - [x] delete old files from database
-- [ ] save price/meter instead of price, check if the result is more consisitent or not
-- [ ] save property type! it was ignored!!!!
+- [x] save price/meter instead of price, check if the result is more consisitent or not
+- [x] save property type! it was ignored!!!!
 
 
 

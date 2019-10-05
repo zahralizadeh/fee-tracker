@@ -11,6 +11,7 @@ from django.utils.timezone import make_aware
 logger = logging.getLogger(__name__)
 
 # Create your views here.
+#TODO: Treshhold if tie delta should be managed in admin panel
 def collectdata(request):
     try:
         this_offertype = request.GET['offertype']

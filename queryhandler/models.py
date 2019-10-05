@@ -14,6 +14,16 @@ logger = logging.getLogger(__name__)
 
 # Create your models here.
 class PropertyPredictResponse(models.Model):
+    PROPERTY_TYPE = [
+        ('RES' , 'مسکونی'),
+        ('COM' , 'اداری-تجاری'),
+        ('IND' , 'صنعتی'),
+    ]
+    propertytype = models.CharField(
+        max_length= 3,
+        choices= PROPERTY_TYPE,
+        default='RES',
+    )
     offertype = models.IntegerField()               # From user
     location = models.CharField(max_length = 255)   # From user
     area = models.IntegerField()                    # From user
@@ -37,29 +47,33 @@ class PropertyPredictResponse(models.Model):
             location__contains=self.location,\
             area__range=(self.area-10,self.area+10),\
             rooms=self.rooms,\
+            propertytype=self.propertytype,\
             age__range=(self.age-3 if self.age>3 else 0,self.age+3)).order_by('-publishdate')
 
-        self.filtering = 'offertype location area rooms age'
+        self.filtering = 'offertype propertytype location area rooms age'
         if data.count()< 50:
             data = PropertyFile.objects.filter(\
                 offertype=self.offertype,\
                 location__contains=self.location,\
                 rooms=self.rooms,\
+                propertytype=self.propertytype,\
                 age__range=(self.age-3 if self.age>3 else 0,self.age+3)).order_by('-publishdate')
-            self.filtering = 'offertype location rooms age'
+            self.filtering = 'offertype propertytype location rooms age'
 
             if data.count()< 50:
                 data = PropertyFile.objects.filter(\
                     offertype=self.offertype,\
                     location__contains=self.location,\
+                    propertytype=self.propertytype,\
                     rooms=self.rooms).order_by('-publishdate')
-                self.filtering = 'offertype location rooms'
+                self.filtering = 'offertype propertytype location rooms'
 
                 if data.count()< 50:
                     data = PropertyFile.objects.filter(\
                         offertype=self.offertype,\
+                        propertytype=self.propertytype,\
                         location__contains=self.location).order_by('-publishdate')
-                    self.filtering = 'offertype location'
+                    self.filtering = 'offertype propertytype location'
                     if data.count()< 50:
                         self.filtering = 'not enough data'
                         self.recordcount = data.count()
@@ -73,29 +87,13 @@ class PropertyPredictResponse(models.Model):
                 x.append([data[j].area, data[j].rooms,data[j].age])
                 y.append(data[j].price)
 
-       # if self.offertype == '1':   
-        #    for j in range(0, self.recordcount):
-         #       x.append([data[j].area, data[j].rooms,data[j].age])
-          #      y.append(data[j].price1)
-        #elif self.offertype == '2':
-         #   for j in range(0, self.recordcount):
-          #      x.append([data[j].area, data[j].rooms,data[j].age])
-           #     y.append([data[j].price1,data[j].price2])
         clf = tree.DecisionTreeClassifier(criterion='entropy',max_depth =4, random_state=1)
         clf = clf.fit(x,y)
         answer = clf.predict([[self.area,self.rooms,self.age]])
         
         self.firstdata = data[0].publishdate
-        self.lastdata = data[self.recordcount-1].publishdate
-        
-        self.price = answer[0] 
-        #if self.offertype in (1, '1'):
-          #  self.price = answer[0] * self.area
-           # self.price2 = 0
-        #else:
-         #   self.price1 = answer[0][1]
-            #self.price2 = answer[0][0]
-        
+        self.lastdata = data[self.recordcount-1].publishdate       
+        self.price = answer[0]        
         return self.send_response()
 
     
@@ -130,3 +128,21 @@ class PropertyPredictResponse(models.Model):
                 'count' : '%i'%self.recordcount,
                 'answer': 'I predict its cost as %i tomans for full deposit'%(self.price * self.area),
                 }, encoder=JSONEncoder)
+
+
+
+       # if self.offertype == '1':   
+        #    for j in range(0, self.recordcount):
+         #       x.append([data[j].area, data[j].rooms,data[j].age])
+          #      y.append(data[j].price1)
+        #elif self.offertype == '2':
+         #   for j in range(0, self.recordcount):
+          #      x.append([data[j].area, data[j].rooms,data[j].age])
+           #     y.append([data[j].price1,data[j].price2])
+
+        #if self.offertype in (1, '1'):
+          #  self.price = answer[0] * self.area
+           # self.price2 = 0
+        #else:
+         #   self.price1 = answer[0][1]
+            #self.price2 = answer[0][0]

@@ -26,6 +26,8 @@ class AutoCleanDB(CronJobBase):
     #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
     #TODO: extra data (more that 150 for each  location will be deleted)
     #TODO: if last update was not successfull try again some minutes later
+    #TODO: consider that for each location there should be at least 50 records left
+
     RUN_AT_TIMES = ['4:02']
     schedule = Schedule(run_at_times=RUN_AT_TIMES)
     
@@ -33,8 +35,8 @@ class AutoCleanDB(CronJobBase):
 
     def do(self):
         logger.debug("----AutoCleanDB ----->  is running")
-        #old_files = PropertyFile.objects.all()
-        #old_files.delete()
+        old_files = PropertyFile.objects.all()
+        old_files.delete()
         
         # stage 1: delete old data
         logger.debug("----AutoCleanDB ----->   (stage 1):")

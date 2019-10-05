@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 def query_price(request):
     try:
         this_offertype = request.GET['offertype']
+        this_propertytype = request.GET['propertytype']
         this_location = request.GET['location']
         this_area = int(request.GET['area'])
         this_rooms = int(request.GET['rooms'])
@@ -32,10 +33,16 @@ def query_price(request):
             'message': 'Make sure you have sent correct data & try again!',
             }, encoder=JSONEncoder)
 
-    #TODO: Treshhold should be manged in admin panel
+    if this_propertytype not in ['RES','COM','IND']:
+        return JsonResponse({
+                'status': '400 Bad Request ',
+                'message': 'Make sure you have sent correct propertytype & try again!',
+                }, encoder=JSONEncoder)
+
+    #TODO: Treshhold should be managed in admin panel
     available_response = PropertyPredictResponse.objects.filter(\
-        location =this_location, offertype=this_offertype, area=this_area, age=this_age, rooms=this_rooms, \
-        responseDate__gte=make_aware(datetime.now() - timedelta(days=7)))
+        location =this_location, offertype=this_offertype, propertytype=this_propertytype, area=this_area,\
+        age=this_age, rooms=this_rooms, responseDate__gte=make_aware(datetime.now() - timedelta(days=7)))
     if available_response.count() > 0:
         #TODO: do it by serializer
         response = available_response.order_by('-responseDate')[0]
@@ -46,7 +53,7 @@ def query_price(request):
     else:
         #TODO: token provided or something to prevent robots
         prediction =PropertyPredictResponse(location =this_location, offertype=this_offertype, area=this_area,\
-            age=this_age, rooms=this_rooms)
+            age=this_age, rooms=this_rooms, propertytype=this_propertytype )
         response = prediction.predict()
         prediction.save()
         return response

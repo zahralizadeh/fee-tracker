@@ -155,7 +155,8 @@ class Scrape(models.Model):
         
         # save data in database
         this_file = PropertyFile(offertype = offertype, location = location,area = area,\
-                    price = pm, rooms = rooms,age = age, publishdate = make_aware(date[1]), propertytype = self.propertytype)
+                    price = pm, rooms = rooms,age = age, publishdate = make_aware(date[1]),\
+                    propertytype = self.propertytype)
         this_file.save()
         self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
         return([True , make_aware(date[1])])

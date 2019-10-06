@@ -10,23 +10,43 @@ from django.utils.timezone import make_aware
 
 # Create your models here.
 class PropertyFile(models.Model):
+    PROPERTY_TYPE = [
+        ('RES' , 'مسکونی'),
+        ('COM' , 'اداری-تجاری'),
+        ('IND' , 'صنعتی'),
+    ]
+    propertytype = models.CharField(
+        max_length= 3,
+        choices= PROPERTY_TYPE,
+        default='RES',
+    )
     offertype = models.IntegerField()
     location = models.CharField(max_length = 255)
     area = models.IntegerField()
-    price1 = models.BigIntegerField()
-    price2 = models.BigIntegerField()
+    price = models.BigIntegerField()
     rooms = models.IntegerField()
     age = models.IntegerField()
     publishdate = models.DateTimeField()
+    
     def __str__(self):
         return "{}-{}-{} متری".format(self.offertype, self.location,self.area)
     
 class Scrape(models.Model):
+    PROPERTY_TYPE = [
+        ('RES' , 'مسکونی'),
+        ('COM' , 'اداری-تجاری'),
+        ('IND' , 'صنعتی'),
+    ]
+    propertytype = models.CharField(
+        max_length= 3,
+        choices= PROPERTY_TYPE,
+        default='RES',
+    )
     logger = logging.getLogger(__name__)
     startTime = models.DateTimeField()
     endTime = models.DateTimeField()
     last_update_time = models.DateTimeField()   # time treshhold of last update
-    status = models.CharField(max_length = 20 , default= 'initialied')
+    status = models.CharField(max_length = 20 , default= 'initialied') #TODO: convert to choice
     scrapetype = models.CharField(max_length = 20)  # for Rent / Sell
     site = models.CharField(max_length = 255, default = 'ihome')   #site title for scraping
     baselink = models.CharField(max_length = 255)
@@ -83,7 +103,7 @@ class Scrape(models.Model):
             return False
 
     def buildlink(self):
-        self.baselink = 'https://www.%s.ir/%s/املاک/تهران'%(self.site,self.scrapetype)
+        self.baselink = 'https://www.%s.ir/%s/%s/تهران'%(self.site,self.scrapetype,self.get_propertytype_display())
         if self.site == 'ihome':
             sort_statement  = '?&sort=date_desc'
         if self.pagenumber > 1:
@@ -107,29 +127,39 @@ class Scrape(models.Model):
             self.status = 'error in get Target Page Number'                
         
     def savePropertyFile (self,location,area,price,rooms,age,date):
+        # verifiying data
         if date[0]==False:
             self.logger.debug('----def models.scrape.savePropertyFile: -----> verify date:FALSE')
             return([False , ''])
-
-        if self.scrapetype == 'خرید-فروش':   #save data in database for BUY cases
-            if price[0] > 0 and rooms > 0 and area > 0:
-                this_file = PropertyFile(offertype = 1, location = location,area = area,\
-                    price1 = price[0], price2 = 0,rooms = rooms,age = age, publishdate = make_aware(date[1]))
-                this_file.save()               
-                self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
-                return([True , make_aware(date[1])])
+        if area < 30:
+            self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD AREA')
             return([False , ''])
-        elif self.scrapetype == 'رهن-اجاره': #save data in database for RENT cases
-            #self.logger.debug('----savePropertyFile: -----> loc:%s area:%i p1:%i p2:%i rooms: %i age:%i'\
-            #    %(location,area,price[0],price[1],rooms,age))
-            if price == [0,0] or rooms == 0 or area == 0:  #means data is not valid and usefull 
-                return([False , ''])
-            else:
-                this_file = PropertyFile(offertype = 2 ,location = location,area = area,\
-                    price1 = price[0], price2 = price[1],rooms = rooms,age = age, publishdate = make_aware(date[1]))
-                this_file.save() 
-                self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
-                return([True , make_aware(date[1])])
+        
+        if price == [0,0]  or price ==[0]:
+            self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD PRICE')
+            return([False , ''])
+
+        if rooms == 0:
+            self.logger.debug('----def models.scrape.savePropertyFile: -----> BAD ROOM ')
+            return([False , ''])
+        
+        # set the specific variables for whether buy or rent cases
+        if self.scrapetype == 'خرید-فروش':   # it is a BUY cases
+            pm = price[0] / area
+            offertype = 1
+        elif self.scrapetype == 'رهن-اجاره': # it is a RENT cases
+            total_price = price[1]+int((price[0]*100)/3)
+            pm = total_price / area
+            offertype = 2
+            location = "%s - deposit:%i - rent:%i"%(location,price[1],price[0])
+        
+        # save data in database
+        this_file = PropertyFile(offertype = offertype, location = location,area = area,\
+                    price = pm, rooms = rooms,age = age, publishdate = make_aware(date[1]),\
+                    propertytype = self.propertytype)
+        this_file.save()
+        self.logger.debug('----def models.scrape.savePropertyFile  -----> date saved:%s'%(date[1]))
+        return([True , make_aware(date[1])])
 
     def get_location(self,file):
         return file.find('div',class_='location').span.extract().get_text(strip=True)

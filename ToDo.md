@@ -12,7 +12,7 @@
 - [x] save user request
 - [x] webservice  user request
 - [ ] autentication is complosory for sending request
-- [ ] pridict more consistently - hidden BUG
+- [x] pridict more consistently - hidden BUG
 
 # web scrape
 - [x] webscrape model documentation

@@ -41,7 +41,6 @@ class PropertyPredictResponse(models.Model):
 
     def predict (self):
         #TODO: token provided or something to prevent robots
-        #TODO: prediction model. save result of prediction
         self.responseDate = timezone.make_aware(datetime.now())
         data = PropertyFile.objects.filter(\
             offertype=self.offertype,\
@@ -83,15 +82,7 @@ class PropertyPredictResponse(models.Model):
         self.recordcount = data.count() if data.count()<150 else 150  # max 150 recordes are needed for prediction
         x = []
         y = []
-        # load input and output lists for prediction with last 150 record in database( MAX)
-        #for j in range(0, self.recordcount):
-        #        x.append([data[j].area, data[j].rooms,data[j].age])
-        #        y.append(data[j].price)
-
-        #clf = tree.DecisionTreeClassifier(criterion='entropy',max_depth =4, random_state=1)
-        #clf = clf.fit(x,y)
-        #answer = clf.predict([[self.area,self.rooms,self.age]])
-        
+               
         # load input and output lists for prediction with last 150 record in database( MAX)
         for j in range(0, self.recordcount):
                 x.append([data[j].area, data[j].rooms,data[j].age])

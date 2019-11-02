@@ -12,7 +12,7 @@
 - [x] save user request
 - [x] webservice  user request
 - [ ] autentication is complosory for sending request
-- [x] pridict more consistently - hidden BUG
+- [ ] pridict more consistently - hidden BUG
 
 # web scrape
 - [x] webscrape model documentation
@@ -43,6 +43,7 @@
 - [x] delete old files from database
 - [x] save price/meter instead of price, check if the result is more consisitent or not
 - [x] save property type! it was ignored!!!!
-
+- [ ] 
+ 
 
 

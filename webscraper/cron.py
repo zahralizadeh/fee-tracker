@@ -1,25 +1,52 @@
 import logging
+from sklearn import tree
+import joblib
 from datetime import datetime,timedelta
 from .models import Scrape, PropertyFile
 from django.utils.timezone import make_aware
 from django_cron import CronJobBase, Schedule
+from sklearn.model_selection import GridSearchCV
+from django.conf import settings
 
 logger = logging.getLogger(__name__)
         
-#class FixOffertype(CronJobBase):
-#    RUN_AT_TIMES = ['4:02']
-#   schedule = Schedule(run_at_times=RUN_AT_TIMES)
+
+class BuildGridModel(CronJobBase):
+    #RUN_EVERY_MINS = 120 # every 2 hours
+    #schedule = Schedule(run_every_mins=RUN_EVERY_MINS)
+    #TODO: extra data (more that 150 for each  location will be deleted)
+    #TODO: if last update was not successfull try again some minutes later
+    #TODO: consider that for each location there should be at least 50 records left
+
+    RUN_AT_TIMES =['03:02']
+    schedule = Schedule(run_at_times=RUN_AT_TIMES)
     
-#    code = 'webscraper.FixOffertype'    # a unique code
+    code = 'webscraper.BuildGridModel'    # a unique code
 
-#    def do(self):
-#        buy = PropertyFile.objects.filter(offertype ='خرید-فروش')
-#        buy.update(offertype=1)
-#        logger.debug("----FixOffertype ----->  buy  %i"%buy.count())
-#        rent = PropertyFile.objects.filter(offertype ='رهن-اجاره')
-#        rent.update(offertype=2)
-#        logger.debug("----FixOffertype ----->  rent %i"%rent.count())
-
+    def do(self):
+        #clean = AutoCleanDB()
+        #clean.do()
+        logger.debug("----BuildGridModel ----->  Grid search process started.")
+        data = PropertyFile.objects.all()
+        logger.debug("----BuildGridModel ----->  Grab %i records of data from database"%data.count())
+        x = []
+        y = []
+               
+        # load input and output lists for prediction with last 150 record in database( MAX)
+        for j in range(0, data.count()):
+                x.append([data[j].offertype,data[j].propertytype,data[j].location,data[j].area, data[j].rooms,data[j].age])
+                y.append(data[j].price)
+        model = tree.DecisionTreeRegressor()
+        criterion = ['mse' , 'friedman_mse', 'mse']
+        max_depth = [1,3,5,None]
+        splitter = ['best' , 'random']
+        grid = GridSearchCV(estimator = model, cv=6 , n_jobs = -1\
+            param_grid = dict(criterion = criterion,max_depth =max_depth,splitter = splitter))
+        gs = grid.fit(x,y)
+        logger.debug("----BuildGridModel ----->  New grid search is run.")
+        joblib.dump(gs.best_estimator_, 'gs_price.pkl')
+        settings.GRID_SEARCH_OBJECT_PRICE = gs.best_estimator_
+        logger.debug("----BuildGridModel ----->  New gs file is saved.")
 
 class AutoCleanDB(CronJobBase):
     #RUN_EVERY_MINS = 120 # every 2 hours
@@ -35,9 +62,7 @@ class AutoCleanDB(CronJobBase):
 
     def do(self):
         logger.debug("----AutoCleanDB ----->  is running")
-        old_files = PropertyFile.objects.all()
-        old_files.delete()
-        
+    
         # stage 1: delete old data
         logger.debug("----AutoCleanDB ----->   (stage 1):")
         treshhold = datetime.now() - timedelta(days=90)
@@ -57,7 +82,6 @@ class AutoCleanDB(CronJobBase):
                 row.delete()
                 count += 1
         logger.debug("----AutoCleanDB ----->  (stage 2): %i files deleted."%count)
-
 
 class AutoCollectData(CronJobBase):
     #RUN_EVERY_MINS = 120 # every 2 hours
@@ -125,4 +149,16 @@ class AutoCollectData(CronJobBase):
             #    else:
              #       logger.debug('----AutoCollectData ----->There was an error in process of collecting  RENT data!')
            
+ #class FixOffertype(CronJobBase):
+#    RUN_AT_TIMES = ['4:02']
+#   schedule = Schedule(run_at_times=RUN_AT_TIMES)
     
+#    code = 'webscraper.FixOffertype'    # a unique code
+
+#    def do(self):
+#        buy = PropertyFile.objects.filter(offertype ='خرید-فروش')
+#        buy.update(offertype=1)
+#        logger.debug("----FixOffertype ----->  buy  %i"%buy.count())
+#        rent = PropertyFile.objects.filter(offertype ='رهن-اجاره')
+#        rent.update(offertype=2)
+#        logger.debug("----FixOffertype ----->  rent %i"%rent.count())   
